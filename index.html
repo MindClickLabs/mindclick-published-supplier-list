@@ -1,0 +1,581 @@
+<!doctype html>
+<!--
+  MINDCLICK RATED SUPPLIER LIST TEMPLATE
+  To refresh: replace the CONFIG values and the ROWS array in the script near the bottom.
+  ROWS is one entry per supplier + category, the same shape as the data export:
+    { supplier, status, category, rating }
+  status: Active | Expiring | New      rating: Starter | Achiever | Leader | A-B range (e.g. Achiever-Leader) | In Process
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MindClick Rated Supplier List</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#003E32; --mid:#006F62; --sage:#63A09A; --pale:#A5DFD3; --coral:#FF8674;
+  --bg:#F9F2EC; --card:#fffdfa; --ink:#1c2622; --muted:#6a7772; --line:#e2ddd4; --soft:#eef4f1;
+  --head:#003E32; --accent:#006F62; --logo-ink:#003E32;
+  --t-s:#A5DFD3; --t-a:#FF8674; --t-l:#003E32; --t-off:#e9e4dc;
+  --st-active-bg:#e3f1ec; --st-active:#006F62;
+  --st-exp-bg:#fbeedb; --st-exp:#8a5a12;
+  --st-new-bg:#e6eef6; --st-new:#2d5578;
+  --shadow:0 1px 2px rgba(0,62,50,.06),0 8px 24px rgba(0,62,50,.06);
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1916; --card:#15221e; --ink:#e7eeea; --muted:#9aaba4; --line:#283832; --soft:#1b2b26;
+    --head:#cfeee6; --accent:#7fd0bf; --logo-ink:#e7eeea;
+    --t-l:#3fae97; --t-off:#25342f;
+    --st-active-bg:#173a32; --st-active:#9fe0d1;
+    --st-exp-bg:#3a2d17; --st-exp:#f2c98a;
+    --st-new-bg:#1b2c3c; --st-new:#a9c9e8;
+    --shadow:0 1px 2px rgba(0,0,0,.3);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e1916; --card:#15221e; --ink:#e7eeea; --muted:#9aaba4; --line:#283832; --soft:#1b2b26;
+  --head:#cfeee6; --accent:#7fd0bf; --logo-ink:#e7eeea;
+  --t-l:#3fae97; --t-off:#25342f;
+  --st-active-bg:#173a32; --st-active:#9fe0d1;
+  --st-exp-bg:#3a2d17; --st-exp:#f2c98a;
+  --st-new-bg:#1b2c3c; --st-new:#a9c9e8;
+  --shadow:0 1px 2px rgba(0,0,0,.3);
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 "Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+a{color:var(--accent)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+:focus-visible{outline:2px solid var(--coral);outline-offset:2px}
+
+/* Header */
+.tierline{display:flex;height:6px}
+.tierline i{flex:1}
+.tierline i:nth-child(1){background:var(--pale)}
+.tierline i:nth-child(2){background:var(--coral)}
+.tierline i:nth-child(3){background:var(--green)}
+header.top{padding:34px 0 30px}
+.toprow{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.logo{width:150px;height:auto;display:block}
+.logo .cls-2{fill:var(--logo-ink)}
+.stamp{font-size:13px;color:var(--muted);text-align:right}
+.stamp strong{display:block;color:var(--ink);font-weight:600}
+h1{margin:28px 0 8px;font-size:clamp(32px,5vw,52px);line-height:1.05;letter-spacing:-.025em;font-weight:800;color:var(--head)}
+.lede{max-width:62ch;margin:0;font-size:17px;color:var(--muted)}
+
+/* Steps */
+.steps{display:grid;grid-template-columns:repeat(3,1fr) 1.1fr;gap:0;background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
+.step{padding:22px 22px 24px;border-right:1px solid var(--line)}
+.step .n{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--green);color:#fff;font-weight:800;font-size:13px;margin-bottom:10px}
+:root[data-theme="dark"] .step .n{background:var(--t-l)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .step .n{background:var(--t-l)}}
+.step h2{margin:0 0 4px;font-size:15.5px;font-weight:700;color:var(--head)}
+.step p{margin:0;font-size:13.5px;color:var(--muted)}
+.step.ask{background:var(--soft);border-right:0}
+.step.ask h2{font-size:15px}
+.step.ask a{font-weight:700;text-decoration:none;border-bottom:1.5px solid currentColor}
+
+/* Rating scale */
+.scale{display:grid;grid-template-columns:1.25fr 1fr;gap:40px;padding-top:44px;padding-bottom:8px;align-items:start}
+.scale h2,.finder h2{margin:0 0 6px;font-size:22px;letter-spacing:-.01em;font-weight:800;color:var(--head)}
+.scale p.sub{margin:0 0 20px;color:var(--muted);max-width:56ch}
+.ladder{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.rung{height:14px;border-radius:4px}
+.rung.s{background:var(--t-s)} .rung.a{background:var(--t-a)} .rung.l{background:var(--t-l)}
+.ladder .rung:first-child{border-radius:999px 4px 4px 999px}
+.ladder .rung:last-child{border-radius:4px 999px 999px 4px}
+.rungnames{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:8px;font-weight:700;font-size:14px}
+.rungnames span:nth-child(2){text-align:center}
+.rungnames span:nth-child(3){text-align:right}
+.rungnames small{display:block;font-weight:500;font-size:12px;color:var(--muted)}
+.examples{margin-top:22px;display:grid;gap:10px}
+.ex{display:grid;grid-template-columns:150px 1fr;gap:14px;align-items:center;font-size:13.5px;color:var(--muted)}
+.ex b{color:var(--ink);font-weight:600}
+.statuskey{display:grid;gap:12px;margin-top:4px}
+.statuskey div{display:grid;grid-template-columns:86px 1fr;gap:12px;align-items:baseline;font-size:13.5px;color:var(--muted)}
+
+/* Rating span (the core visual) */
+.span{display:inline-grid;grid-template-columns:repeat(3,1fr);gap:3px;width:132px;height:10px;flex:none}
+.span i{display:block;background:var(--t-off);border-radius:3px}
+.span i:first-child{border-radius:999px 3px 3px 999px}
+.span i:last-child{border-radius:3px 999px 999px 3px}
+.span i.on.s{background:var(--t-s)} .span i.on.a{background:var(--t-a)} .span i.on.l{background:var(--t-l)}
+.span.proc i{background:none;border:1.5px dashed var(--line)}
+.rate{display:flex;align-items:center;gap:12px;white-space:nowrap}
+.rate .lbl{font-size:13.5px;font-weight:600}
+.rate.proc .lbl{color:var(--muted);font-weight:500;font-style:italic}
+
+/* Status pill */
+.pill{display:inline-block;font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap;line-height:1.5}
+.pill.Active{background:var(--st-active-bg);color:var(--st-active)}
+.pill.Expiring{background:var(--st-exp-bg);color:var(--st-exp)}
+.pill.New{background:var(--st-new-bg);color:var(--st-new)}
+.pill.other{background:var(--soft);color:var(--muted)}
+
+/* Finder */
+.finder{padding-top:40px;padding-bottom:60px}
+.findhead{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.findhead p{margin:0;color:var(--muted)}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;color:var(--accent);cursor:pointer}
+.btn:hover{background:var(--soft)}
+.btn.primary{background:var(--green);border-color:var(--green);color:#fff}
+.btn.primary:hover{background:var(--mid);border-color:var(--mid)}
+.btn svg{width:15px;height:15px}
+
+.controls{position:sticky;top:0;z-index:5;background:var(--bg);padding:12px 0;border-bottom:1px solid var(--line)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.controls{top:env(safe-area-inset-top,0px)}
+.crow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.crow + .crow{margin-top:10px}
+.search{flex:1 1 280px;display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:0 14px}
+.search:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,111,98,.14)}
+.search svg{width:17px;height:17px;color:var(--muted);flex:none}
+.search input{border:0;background:none;outline:none;width:100%;padding:11px 0;font-size:14.5px}
+select{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 34px 10px 13px;font-size:14px;appearance:none;-webkit-appearance:none;cursor:pointer;max-width:100%;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2363A09A' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;background-size:14px}
+.seg{display:inline-flex;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:3px}
+.seg button{border:0;background:none;padding:7px 13px;border-radius:9px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--green);color:#fff}
+.group{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.group > span{font-size:12.5px;color:var(--muted);font-weight:600;margin-right:2px}
+.chip{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:600;cursor:pointer}
+.chip .dot{width:9px;height:9px;border-radius:50%}
+.chip[aria-pressed="true"]{border-color:var(--accent);background:var(--soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.chip .c{color:var(--muted);font-weight:500}
+.dot.s{background:var(--t-s)} .dot.a{background:var(--t-a)} .dot.l{background:var(--t-l)} .dot.p{border:1.5px dashed var(--muted)}
+.spacer{flex:1}
+.reset{border:0;background:none;color:var(--accent);font-weight:700;font-size:13px;cursor:pointer;padding:6px 4px}
+.reset[hidden]{display:none}
+.count{font-size:13px;color:var(--muted);margin:14px 2px 10px}
+.count b{color:var(--ink)}
+
+/* Results list */
+.list{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
+.lhead,.entry{display:grid;grid-template-columns:minmax(220px,1.05fr) 2fr}
+.lhead{background:var(--soft);font-size:12px;font-weight:700;color:var(--muted);padding:10px 22px;gap:20px}
+.lhead .sub{display:grid;grid-template-columns:1fr 250px;gap:20px}
+.entry{padding:16px 22px;gap:20px;border-top:1px solid var(--line)}
+.lhead + .entry{border-top:0}
+.who{display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-width:0}
+.who h3{margin:0;font-size:15.5px;font-weight:700;line-height:1.3;color:var(--ink)}
+.who .meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.star{border:0;background:none;padding:2px 0;font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+.star svg{width:15px;height:15px}
+.star[aria-pressed="true"]{color:var(--accent)}
+.star[aria-pressed="true"] svg{fill:currentColor}
+.lines{list-style:none;margin:0;padding:0}
+.lines li{display:grid;grid-template-columns:1fr 250px;gap:20px;align-items:center;padding:5px 0}
+.lines li + li{border-top:1px dashed var(--line)}
+.lines .cat{font-size:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.empty{padding:48px 24px;text-align:center;color:var(--muted)}
+.empty strong{display:block;color:var(--ink);font-size:16px;margin-bottom:4px}
+mark{background:rgba(255,134,116,.28);color:inherit;border-radius:3px;padding:0 1px}
+
+/* Shortlist bar */
+.shortbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:20;display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;width:max-content;background:var(--green);color:#fff;padding:10px 12px 10px 18px;border-radius:16px;box-shadow:0 10px 30px rgba(0,30,24,.3);max-width:calc(100% - 24px)}
+.shortbar[hidden]{display:none}
+.shortbar span{font-weight:700;font-size:14px;margin-right:6px}
+.shortbar button{border:1px solid rgba(255,255,255,.35);background:none;color:#fff;border-radius:10px;padding:7px 12px;font-size:13px;font-weight:700;cursor:pointer}
+.shortbar button.go{background:#fff;color:var(--green);border-color:#fff}
+.toast{font-size:12.5px;opacity:.85}
+.toast:empty{display:none}
+
+footer{border-top:1px solid var(--line);padding:26px 0 90px;color:var(--muted);font-size:13px}
+footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+/* Responsive */
+@media (max-width:920px){
+  .steps{grid-template-columns:1fr 1fr}
+  .step:nth-child(2){border-right:0}
+  .step:nth-child(-n+2){border-bottom:1px solid var(--line)}
+  .scale{grid-template-columns:1fr;gap:30px}
+}
+@media (max-width:720px){
+  .wrap{padding-left:16px;padding-right:16px}
+  .steps{grid-template-columns:1fr}
+  .step{border-right:0;border-bottom:1px solid var(--line)}
+  .step.ask{border-bottom:0}
+  .lhead{display:none}
+  .entry{grid-template-columns:1fr;gap:10px;padding:16px}
+  .lines li{grid-template-columns:1fr;gap:6px;padding:8px 0}
+  .ex{grid-template-columns:1fr;gap:6px}
+  .controls{position:static}
+  .stamp{text-align:left}
+}
+@media (prefers-reduced-motion:no-preference){
+  .span i{transition:background-color .2s}
+}
+
+/* Print / PDF */
+@media print{
+  :root{--bg:#fff;--card:#fff;--shadow:none}
+  .controls,.tools,.shortbar,.star,.findhead p{display:none!important}
+  .finder{padding-top:10px!important}
+  .entry{break-inside:avoid}
+  .span i{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .pill,.tierline i,.rung{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  footer{padding-bottom:0}
+}
+</style>
+</head>
+<body>
+<div class="tierline" aria-hidden="true"><i></i><i></i><i></i></div>
+
+<header class="top">
+  <div class="wrap">
+    <div class="toprow">
+      <svg class="logo" role="img" aria-label="MindClick" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 626.93 246.12">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #63a09a;
+      }
+
+      .cls-2 {
+        fill: #003e32;
+      }
+    </style>
+  </defs>
+  <path class="cls-2" d="M619.54,135.74c2.07,2.07,3.1,4.56,3.1,7.49s-1.06,5.54-3.18,7.6c-2.06,1.99-4.53,2.99-7.41,2.99s-5.49-1.02-7.53-3.06c-2.04-2.04-3.06-4.55-3.06-7.53s1.1-5.67,3.3-7.72c2.07-1.92,4.5-2.87,7.28-2.87s5.42,1.03,7.49,3.1ZM612.05,134.44c-2.43,0-4.51.88-6.22,2.64-1.69,1.72-2.53,3.77-2.53,6.14s.86,4.54,2.57,6.25c1.7,1.71,3.76,2.57,6.18,2.57s4.46-.86,6.16-2.59c1.7-1.73,2.56-3.81,2.56-6.24s-.85-4.4-2.54-6.14c-1.71-1.76-3.77-2.64-6.18-2.64ZM610.49,144.96v4.15h-3.07v-11.74c.73,0,1.82,0,3.27,0,1.45,0,2.26.01,2.42.02.93.07,1.7.27,2.31.6,1.04.57,1.57,1.51,1.57,2.8,0,.99-.28,1.7-.83,2.14-.55.44-1.23.7-2.03.79.74.15,1.29.38,1.67.68.69.56,1.03,1.43,1.03,2.63v1.05c0,.12,0,.23.02.34.01.11.04.23.08.34l.1.33h-2.93c-.1-.37-.16-.91-.19-1.62s-.09-1.19-.19-1.44c-.15-.41-.44-.7-.86-.86-.23-.1-.58-.16-1.05-.19l-.68-.04h-.65ZM611.68,142.85c.72,0,1.28-.14,1.68-.43.4-.29.6-.75.6-1.39s-.32-1.09-.95-1.34c-.42-.16-1.02-.24-1.78-.24h-.75v3.41h1.19Z"/>
+  <path class="cls-2" d="M30.08,88.11h18.04v9.92c3.61-7.21,10.43-11.21,18.68-11.21,8.89,0,15.72,4.51,18.94,12.24,4.25-7.86,11.21-12.24,20.23-12.24,6.06,0,11.34,2.19,14.94,6.18,3.61,3.99,6.06,9.79,6.06,18.55v40.97h-18.68v-37.36c0-4.77-1.03-7.86-2.7-9.53-1.68-1.93-3.86-2.71-6.7-2.71-6.96,0-11.08,5.41-11.08,14.94v34.66h-18.68v-37.36c0-4.77-.9-7.86-2.58-9.53-1.68-1.93-3.99-2.71-6.83-2.71-6.96,0-10.95,5.41-10.95,14.94v34.66h-18.68v-64.42Z"/>
+  <rect class="cls-2" x="139.07" y="88.11" width="18.68" height="64.42"/>
+  <path class="cls-2" d="M170.51,88.11h18.04v9.79c3.74-6.83,10.56-11.08,19.58-11.08,6.7,0,12.37,2.45,16.36,6.7,3.99,4.25,6.31,10.31,6.31,19.32v39.68h-18.68v-36.85c0-4.25-1.03-7.6-2.96-9.66-1.93-2.19-4.51-3.09-7.73-3.09-7.6,0-12.24,5.8-12.24,14.94v34.66h-18.68v-64.42Z"/>
+  <path class="cls-2" d="M321.23,120.32c0-19.45,13.91-33.5,33.5-33.5,15.72,0,28.86,9.02,31.82,24.35l-19.2,1.93c-.9-7.09-6.18-11.59-12.63-11.59-8.63,0-14.17,7.6-14.17,18.81s5.54,18.81,14.17,18.81c6.31,0,11.72-4.51,12.63-11.98l19.2,1.93c-3.35,15.85-16.49,24.74-31.82,24.74-19.45,0-33.5-14.04-33.5-33.5Z"/>
+  <path class="cls-2" d="M397.47,67.02h18.68v85.5h-18.68v-85.5Z"/>
+  <rect class="cls-2" x="428.6" y="88.11" width="18.68" height="64.42"/>
+  <path class="cls-2" d="M455.18,120.32c0-19.45,13.91-33.5,33.5-33.5,15.72,0,28.86,9.02,31.82,24.35l-19.2,1.93c-.9-7.09-6.18-11.59-12.63-11.59-8.63,0-14.17,7.6-14.17,18.81s5.54,18.81,14.17,18.81c6.31,0,11.72-4.51,12.63-11.98l19.2,1.93c-3.35,15.85-16.49,24.74-31.82,24.74-19.45,0-33.5-14.04-33.5-33.5Z"/>
+  <path class="cls-2" d="M289.72,67.02c-.21,1.46-.38,15.4-.5,31.62l-.8-1.1c-4.12-6.57-11.47-10.56-20.74-10.56-16.62,0-28.21,14.3-28.21,33.24s11.59,33.24,28.21,33.24c9.53,0,17.14-4.38,21.13-11.21l.16-.09c-.03,6.33-.04,10.37-.04,10.37h18.6s.37-81.88,1.05-85.5h-18.85ZM273.6,139.02c-9.28,0-15.07-8.12-15.07-18.81s5.8-18.81,15.07-18.81,15.2,8.12,15.2,18.81-5.8,18.81-15.2,18.81Z"/>
+  <polygon class="cls-2" points="565.72 118.25 590.97 88.11 567.39 88.11 547.29 113.87 547.29 67.02 529 67.02 529 152.65 547.29 152.65 547.29 123.41 569.45 152.52 593.16 152.52 565.72 118.25"/>
+  <path class="cls-2" d="M428.38,70.26c0-5.58,4.1-9.45,9.56-9.45s9.56,3.87,9.56,9.45-4.1,9.45-9.56,9.45-9.56-3.87-9.56-9.45Z"/>
+  <path class="cls-1" d="M13.02,152.52H4.29v-74.28C4.29,37.31,37.6,4,78.54,4s74.24,33.31,74.24,74.24h-8.73c0-36.12-29.39-65.51-65.51-65.51S13.02,42.12,13.02,78.24v74.28Z"/>
+  <path class="cls-1" d="M223.32,241.83c-43.9,0-79.62-35.72-79.62-79.62h9.36c0,38.74,31.52,70.26,70.26,70.26s70.26-31.52,70.26-70.26h9.36c0,43.9-35.72,79.62-79.62,79.62Z"/>
+  <path class="cls-1" d="M437.9,53.05c-10.34-28.57-37.74-49.05-69.84-49.05s-62.07,22.46-71.18,53.16h9.17c8.8-25.81,33.26-44.43,62.01-44.43s51.89,17.63,61.27,42.35c2.5-1.3,5.4-2.03,8.57-2.03Z"/>
+</svg>
+      <div class="stamp"><strong id="approved"></strong><span id="updated"></span></div>
+    </div>
+    <h1>Rated Supplier List</h1>
+    <p class="lede">Suppliers in the MindClick network and how their products are rated under MSAP, by product category. Use it to shortlist vendors for your project and see where each one stands.</p>
+  </div>
+</header>
+
+<section class="wrap" aria-label="How to use this list">
+  <div class="steps">
+    <div class="step"><span class="n">1</span><h2>Find suppliers</h2><p>Search or filter this list for the suppliers you’re considering.</p></div>
+    <div class="step"><span class="n">2</span><h2>Send your product list</h2><p>For suppliers on the list, send MindClick the specific products you’re considering from them.</p></div>
+    <div class="step"><span class="n">3</span><h2>Get product ratings</h2><p>Within 48 hours, MindClick confirms which of those products are currently rated and shares their ratings.</p></div>
+    <div class="step ask"><h2>Supplier not on the list?</h2><p>Contact <span class="cname"></span> at <a class="cmail" href="#"></a> to refer a supplier to our network.</p></div>
+  </div>
+</section>
+
+<section class="wrap scale" aria-labelledby="scaleh">
+  <div>
+    <h2 id="scaleh">How to read a rating</h2>
+    <p class="sub">MSAP ratings have three levels. A supplier’s rating covers its rated products in that category, so it can be a single level or a range.</p>
+    <div class="ladder" aria-hidden="true"><div class="rung s"></div><div class="rung a"></div><div class="rung l"></div></div>
+    <div class="rungnames"><span>Starter<small>Entry level</small></span><span>Achiever<small>Middle level</small></span><span>Leader<small>Highest level</small></span></div>
+    <div class="examples">
+      <div class="ex"><span class="rate"><span class="span"><i class="s"></i><i class="a"></i><i class="l on"></i></span></span><span><b>Leader</b>: every rated product in the category is at Leader.</span></div>
+      <div class="ex"><span class="rate"><span class="span"><i class="s"></i><i class="a on"></i><i class="l on"></i></span></span><span><b>Achiever–Leader</b>: rated products range from Achiever to Leader. MindClick confirms each product in step 3.</span></div>
+      <div class="ex"><span class="rate proc"><span class="span proc"><i></i><i></i><i></i></span></span><span><b>In process</b>: the assessment is under way and there’s no rating yet.</span></div>
+    </div>
+  </div>
+  <div>
+    <h2>Supplier status</h2>
+    <p class="sub">Where each supplier is in the program.</p>
+    <div class="statuskey">
+      <div><span class="pill Active">Active</span><span>Rating is current.</span></div>
+      <div><span class="pill Expiring">Expiring</span><span>Rating is due for renewal. Confirm current ratings with MindClick before specifying.</span></div>
+      <div><span class="pill New">New</span><span>Recently joined the network. Ratings are usually in process.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap finder" aria-labelledby="findh">
+  <div class="findhead">
+    <div><h2 id="findh">Suppliers</h2><p>Shortlist suppliers as you go, then send the list to MindClick.</p></div>
+    <div class="tools">
+      <button class="btn" id="pdfBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v7H6z"/></svg>Print or save PDF</button>
+      <button class="btn primary" id="csvBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Download CSV</button>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="crow">
+      <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="Search suppliers or categories" aria-label="Search suppliers or categories" autocomplete="off"></label>
+      <select id="cat" aria-label="Category"></select>
+      <select id="sort" aria-label="Sort">
+        <option value="name">Sort: A–Z</option>
+        <option value="rating">Sort: highest rated first</option>
+      </select>
+      <div class="seg" role="group" aria-label="View">
+        <button type="button" data-view="supplier" aria-pressed="true">By supplier</button>
+        <button type="button" data-view="category" aria-pressed="false">By category</button>
+      </div>
+    </div>
+    <div class="crow">
+      <div class="group" id="tierChips"><span>Rating includes</span></div>
+      <div class="group" id="statusChips"><span>Status</span></div>
+      <div class="spacer"></div>
+      <button class="reset" id="reset" type="button" hidden>Clear filters</button>
+    </div>
+  </div>
+
+  <p class="count" id="count" aria-live="polite"></p>
+  <div class="list" id="list"></div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>Copyright © <span id="yr"></span> MindClick. Ratings are confirmed per product by MindClick on request.</span>
+    <span id="foot-upd"></span>
+  </div>
+</footer>
+
+<div class="shortbar" id="shortbar" hidden role="region" aria-label="Shortlist">
+  <span id="shortcount"></span>
+  <button type="button" id="shortShow">Show only these</button>
+  <button type="button" id="shortCopy">Copy list</button>
+  <button type="button" class="go" id="shortMail">Email to MindClick</button>
+  <button type="button" id="shortClear" aria-label="Clear shortlist">Clear</button>
+  <span class="toast" id="toast"></span>
+</div>
+
+<script>
+/* ===================== CONFIG ===================== */
+const CONFIG = {
+  approved: "October 2026",
+  updated: "2026-10-20T15:21:08",
+  contactName: "Allison Pine",
+  contactEmail: "apine@mindclick.com",
+  shortlistEmail: "apine@mindclick.com"
+};
+
+/* ===================== DATA (replace with export) ===================== */
+const ROWS = /*@DATA*/[
+  {"supplier":"Artco International","status":"Expiring","category":"Casegoods","rating":"Achiever-Leader"},
+  {"supplier":"Arteriors Hospitality","status":"Expiring","category":"Art, Murals, Paintings + Sculpture","rating":"Starter-Achiever"},
+  {"supplier":"Arteriors Hospitality","status":"Expiring","category":"Casegoods","rating":"Achiever"},
+  {"supplier":"Arteriors Hospitality","status":"Expiring","category":"Glass, Films + Mirrors","rating":"Achiever"},
+  {"supplier":"Arteriors Hospitality","status":"Expiring","category":"Lighting, Bulbs + Shades","rating":"Achiever"},
+  {"supplier":"Arteriors Hospitality","status":"Expiring","category":"Seating + Upholstered Furniture","rating":"Achiever"},
+  {"supplier":"Arteriors Hospitality","status":"Expiring","category":"Tables","rating":"Achiever"},
+  {"supplier":"ASCH, LLC","status":"New","category":"Casegoods","rating":"In Process"},
+  {"supplier":"AtmosAir","status":"New","category":"MEP","rating":"In Process"},
+  {"supplier":"Ava by Novalis","status":"Expiring","category":"Flooring","rating":"Leader"},
+  {"supplier":"BERMANFALK Hospitality Group","status":"Active","category":"Casegoods","rating":"Achiever-Leader"},
+  {"supplier":"Brintons","status":"Expiring","category":"Carpet + Area Rugs","rating":"Leader"},
+  {"supplier":"Brown Jordan","status":"Expiring","category":"Outdoor Furniture + Site Furniture","rating":"Starter-Achiever"},
+  {"supplier":"Bryan Ashley","status":"Active","category":"Casegoods","rating":"Starter-Leader"},
+  {"supplier":"Bryan Ashley","status":"Active","category":"Seating + Upholstered Furniture","rating":"Starter-Leader"},
+  {"supplier":"BSF","status":"Active","category":"Casegoods","rating":"Achiever-Leader"},
+  {"supplier":"CM Hospitality","status":"Expiring","category":"Carpet + Area Rugs","rating":"Leader"},
+  {"supplier":"CM Hospitality","status":"Expiring","category":"Flooring","rating":"Achiever"},
+  {"supplier":"Daltile","status":"Expiring","category":"Countertops","rating":"Achiever"},
+  {"supplier":"Daltile","status":"Expiring","category":"Tile","rating":"Leader"},
+  {"supplier":"Dickson Furniture Manufacturers","status":"Active","category":"Casegoods","rating":"Achiever-Leader"},
+  {"supplier":"Dometic","status":"Active","category":"Equipment","rating":"Starter-Leader"}
+]/*@END*/;
+
+/* ===================== APP ===================== */
+(function(){
+const TIERS = ["Starter","Achiever","Leader"];
+const TK = ["s","a","l"];
+const STATUSES = ["Active","Expiring","New"];
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+function parseRating(raw){
+  const r = String(raw||"").trim();
+  if (!r || /process|pending/i.test(r)) return {proc:true, label:"In process", key:-1};
+  const parts = r.split(/\s*[-–—]\s*/).map(p => TIERS.findIndex(t => t.toLowerCase() === p.toLowerCase()));
+  if (parts.some(i => i < 0)) return {unknown:true, label:r, key:-2};
+  const lo = Math.min(...parts), hi = Math.max(...parts);
+  return {lo, hi, label: lo===hi ? TIERS[lo] : TIERS[lo]+"–"+TIERS[hi], key: hi*10+lo};
+}
+const rows = ROWS.map((r,i) => ({...r, id:i, supplier:String(r.supplier||"").trim(), category:String(r.category||"").trim(), status:String(r.status||"").trim(), r:parseRating(r.rating)}));
+
+const state = {q:"", cat:"", sort:"name", view:"supplier", tiers:new Set(), statuses:new Set(), onlyShort:false};
+let shortlist = new Set();
+try { shortlist = new Set(JSON.parse(localStorage.getItem("mc-rsl-shortlist")||"[]")); } catch(e){}
+const saveShort = () => { try { localStorage.setItem("mc-rsl-shortlist", JSON.stringify([...shortlist])); } catch(e){} };
+
+/* Header text */
+const upd = new Date(CONFIG.updated);
+const updStr = isNaN(upd) ? CONFIG.updated : upd.toLocaleString("en-US",{month:"long",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"});
+$("#approved").textContent = "Approved for publication " + CONFIG.approved;
+$("#updated").textContent = "Last updated " + updStr;
+$("#foot-upd").textContent = "Last updated " + updStr;
+$("#yr").textContent = isNaN(upd) ? new Date().getFullYear() : upd.getFullYear();
+document.querySelectorAll(".cname").forEach(e => e.textContent = CONFIG.contactName);
+document.querySelectorAll(".cmail").forEach(e => { e.textContent = CONFIG.contactEmail; e.href = "mailto:" + CONFIG.contactEmail; });
+
+/* Controls */
+const cats = [...new Set(rows.map(r => r.category))].sort((a,b) => a.localeCompare(b));
+const catSel = $("#cat");
+catSel.innerHTML = `<option value="">All categories (${cats.length})</option>` + cats.map(c => {
+  const n = new Set(rows.filter(r => r.category===c).map(r => r.supplier)).size;
+  return `<option value="${esc(c)}">${esc(c)} (${n})</option>`;
+}).join("");
+
+const tierDefs = [["Leader","l"],["Achiever","a"],["Starter","s"],["In process","p"]];
+$("#tierChips").insertAdjacentHTML("beforeend", tierDefs.map(([t,k]) => `<button type="button" class="chip" data-tier="${t}" aria-pressed="false"><span class="dot ${k}"></span>${t}</button>`).join(""));
+const statusCounts = s => new Set(rows.filter(r => r.status===s).map(r => r.supplier)).size;
+const extraStatuses = [...new Set(rows.map(r => r.status))].filter(s => s && !STATUSES.includes(s));
+$("#statusChips").insertAdjacentHTML("beforeend", [...STATUSES, ...extraStatuses].filter(s => statusCounts(s)).map(s => `<button type="button" class="chip" data-status="${esc(s)}" aria-pressed="false">${esc(s)} <span class="c">${statusCounts(s)}</span></button>`).join(""));
+
+/* Filtering */
+function rowMatches(r){
+  if (state.cat && r.category !== state.cat) return false;
+  if (state.statuses.size && !state.statuses.has(r.status)) return false;
+  if (state.onlyShort && !shortlist.has(r.supplier)) return false;
+  if (state.tiers.size){
+    let ok = false;
+    if (r.r.proc) ok = state.tiers.has("In process");
+    else if (!r.r.unknown) for (let i=r.r.lo; i<=r.r.hi; i++) if (state.tiers.has(TIERS[i])) ok = true;
+    if (!ok) return false;
+  }
+  if (state.q){
+    const q = state.q.toLowerCase();
+    if (!r.supplier.toLowerCase().includes(q) && !r.category.toLowerCase().includes(q)) return false;
+  }
+  return true;
+}
+const hl = s => {
+  if (!state.q) return esc(s);
+  const i = s.toLowerCase().indexOf(state.q.toLowerCase());
+  if (i < 0) return esc(s);
+  return esc(s.slice(0,i)) + "<mark>" + esc(s.slice(i, i+state.q.length)) + "</mark>" + esc(s.slice(i+state.q.length));
+};
+const pill = s => s ? `<span class="pill ${STATUSES.includes(s)?esc(s):"other"}">${esc(s)}</span>` : "";
+function spanHTML(r){
+  if (r.proc) return `<span class="rate proc"><span class="span proc" aria-hidden="true"><i></i><i></i><i></i></span><span class="lbl">In process</span></span>`;
+  if (r.unknown) return `<span class="rate"><span class="lbl">${esc(r.label)}</span></span>`;
+  const cells = TK.map((k,i) => `<i class="${k}${i>=r.lo&&i<=r.hi?" on":""}"></i>`).join("");
+  return `<span class="rate"><span class="span" aria-hidden="true">${cells}</span><span class="lbl">${esc(r.label)}</span></span>`;
+}
+const starSVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.2l1.1-6.2L3 9.6l6.2-.9z"/></svg>`;
+const starBtn = name => { const on = shortlist.has(name); return `<button type="button" class="star" data-sup="${esc(name)}" aria-pressed="${on}">${starSVG}${on?"Shortlisted":"Shortlist"}</button>`; };
+const bestKey = list => Math.max(...list.map(r => r.r.key));
+
+function render(){
+  const hits = rows.filter(rowMatches);
+  const list = $("#list");
+  const anyFilter = state.q || state.cat || state.tiers.size || state.statuses.size || state.onlyShort;
+  $("#reset").hidden = !anyFilter;
+
+  const bySup = new Map();
+  hits.forEach(r => { if (!bySup.has(r.supplier)) bySup.set(r.supplier, []); bySup.get(r.supplier).push(r); });
+  const nSup = bySup.size, nCat = new Set(hits.map(r => r.category)).size;
+  $("#count").innerHTML = hits.length
+    ? `Showing <b>${nSup}</b> supplier${nSup===1?"":"s"} across <b>${nCat}</b> categor${nCat===1?"y":"ies"}` + (anyFilter ? ` <span>(of ${new Set(rows.map(r=>r.supplier)).size} in the program)</span>` : "")
+    : "";
+
+  if (!hits.length){
+    list.innerHTML = `<div class="empty"><strong>No suppliers match these filters.</strong>Try a broader search or <button class="reset" type="button" data-clear>clear filters</button>. Looking for a supplier we don’t list? Contact ${esc(CONFIG.contactName)} at <a href="mailto:${esc(CONFIG.contactEmail)}">${esc(CONFIG.contactEmail)}</a>.</div>`;
+    return;
+  }
+
+  if (state.view === "supplier"){
+    let sups = [...bySup.entries()];
+    sups.sort((a,b) => state.sort==="rating" ? (bestKey(b[1]) - bestKey(a[1])) || a[0].localeCompare(b[0]) : a[0].localeCompare(b[0], undefined, {sensitivity:"base"}));
+    list.innerHTML = `<div class="lhead"><span>Supplier</span><span class="sub"><span>Category</span><span>MSAP rating</span></span></div>` +
+      sups.map(([name, rs]) => {
+        const sts = [...new Set(rs.map(r => r.status))];
+        const one = sts.length === 1;
+        rs.sort((a,b) => state.sort==="rating" ? (b.r.key-a.r.key) || a.category.localeCompare(b.category) : a.category.localeCompare(b.category));
+        return `<article class="entry"><div class="who"><h3>${hl(name)}</h3><div class="meta">${one?pill(sts[0]):""}${starBtn(name)}</div></div>
+          <ul class="lines">${rs.map(r => `<li><span class="cat">${hl(r.category)}${one?"":pill(r.status)}</span>${spanHTML(r.r)}</li>`).join("")}</ul></article>`;
+      }).join("");
+  } else {
+    const byCat = new Map();
+    hits.forEach(r => { if (!byCat.has(r.category)) byCat.set(r.category, []); byCat.get(r.category).push(r); });
+    const cs = [...byCat.entries()].sort((a,b) => a[0].localeCompare(b[0]));
+    list.innerHTML = `<div class="lhead"><span>Category</span><span class="sub"><span>Supplier</span><span>MSAP rating</span></span></div>` +
+      cs.map(([c, rs]) => {
+        rs.sort((a,b) => state.sort==="rating" ? (b.r.key-a.r.key) || a.supplier.localeCompare(b.supplier) : a.supplier.localeCompare(b.supplier, undefined, {sensitivity:"base"}));
+        return `<article class="entry"><div class="who"><h3>${hl(c)}</h3><div class="meta"><span class="pill other">${rs.length} supplier${rs.length===1?"":"s"}</span></div></div>
+          <ul class="lines">${rs.map(r => `<li><span class="cat"><strong>${hl(r.supplier)}</strong>${pill(r.status)}${starBtn(r.supplier)}</span>${spanHTML(r.r)}</li>`).join("")}</ul></article>`;
+      }).join("");
+  }
+}
+
+function renderShort(){
+  const n = shortlist.size;
+  $("#shortbar").hidden = n === 0;
+  $("#shortcount").textContent = `${n} supplier${n===1?"":"s"} shortlisted`;
+  $("#shortShow").textContent = state.onlyShort ? "Show all" : "Show only these";
+  if (!n && state.onlyShort){ state.onlyShort = false; render(); }
+}
+function shortText(){
+  return [...shortlist].sort().map(s => {
+    const cs = rows.filter(r => r.supplier===s).map(r => `   ${r.category}: ${r.r.label}`);
+    return `${s}\n${cs.join("\n")}\n   Products under consideration: `;
+  }).join("\n\n");
+}
+const toast = m => { const t = $("#toast"); t.textContent = m; clearTimeout(toast.t); toast.t = setTimeout(() => t.textContent = "", 2200); };
+
+/* Events */
+let qt;
+$("#q").addEventListener("input", e => { clearTimeout(qt); qt = setTimeout(() => { state.q = e.target.value.trim(); render(); }, 120); });
+catSel.addEventListener("change", e => { state.cat = e.target.value; render(); });
+$("#sort").addEventListener("change", e => { state.sort = e.target.value; render(); });
+document.querySelectorAll("[data-view]").forEach(b => b.addEventListener("click", () => {
+  state.view = b.dataset.view;
+  document.querySelectorAll("[data-view]").forEach(x => x.setAttribute("aria-pressed", x===b));
+  render();
+}));
+function toggleChip(b, set, val){ set.has(val) ? set.delete(val) : set.add(val); b.setAttribute("aria-pressed", set.has(val)); render(); }
+$("#tierChips").addEventListener("click", e => { const b = e.target.closest("[data-tier]"); if (b) toggleChip(b, state.tiers, b.dataset.tier); });
+$("#statusChips").addEventListener("click", e => { const b = e.target.closest("[data-status]"); if (b) toggleChip(b, state.statuses, b.dataset.status); });
+function clearAll(){
+  state.q=""; state.cat=""; state.tiers.clear(); state.statuses.clear(); state.onlyShort=false;
+  $("#q").value=""; catSel.value="";
+  document.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed","false"));
+  render(); renderShort();
+}
+$("#reset").addEventListener("click", clearAll);
+$("#list").addEventListener("click", e => {
+  if (e.target.closest("[data-clear]")) return clearAll();
+  const s = e.target.closest(".star"); if (!s) return;
+  const name = s.dataset.sup;
+  shortlist.has(name) ? shortlist.delete(name) : shortlist.add(name);
+  saveShort(); render(); renderShort();
+});
+$("#shortShow").addEventListener("click", () => { state.onlyShort = !state.onlyShort; render(); renderShort(); });
+$("#shortClear").addEventListener("click", () => { shortlist.clear(); saveShort(); state.onlyShort=false; render(); renderShort(); });
+$("#shortCopy").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText(shortText()); toast("Copied"); } catch(e){ toast("Copy not available here"); }
+});
+$("#shortMail").addEventListener("click", () => {
+  const body = "Hello MindClick,\n\nPlease confirm which products from these suppliers are currently rated:\n\n" + shortText() + "\n\nThank you,";
+  location.href = `mailto:${CONFIG.shortlistEmail}?subject=${encodeURIComponent("Product rating request")}&body=${encodeURIComponent(body)}`;
+});
+$("#pdfBtn").addEventListener("click", () => window.print());
+$("#csvBtn").addEventListener("click", () => {
+  const hits = rows.filter(rowMatches);
+  const q = v => `"${String(v).replace(/"/g,'""')}"`;
+  const csv = ["Supplier Name,Status,Category,MSAP Rating", ...hits.map(r => [r.supplier, r.status, r.category, r.rating].map(q).join(","))].join("\r\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob(["\ufeff"+csv], {type:"text/csv;charset=utf-8"}));
+  a.download = "MindClick_Rated_Supplier_List.csv";
+  document.body.appendChild(a); a.click(); a.remove();
+});
+
+render(); renderShort();
+})();
+</script>
+</body>
+</html>
