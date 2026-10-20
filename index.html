@@ -1,10 +1,8 @@
 <!doctype html>
 <!--
   MINDCLICK RATED SUPPLIER LIST TEMPLATE
-  To refresh: replace the CONFIG values and the ROWS array in the script near the bottom.
-  ROWS is one entry per supplier + category, the same shape as the data export:
-    { supplier, status, category, rating }
-  status: Active | Expiring | New      rating: Starter | Achiever | Leader | A-B range (e.g. Achiever-Leader) | In Process
+  Refresh with:  python build_supplier_list.py PSL_<date>.csv template.html out.html
+  The script fills the DATA block and the approved/updated dates in CONFIG. Contact details live in CONFIG.
 -->
 <html lang="en">
 <head>
@@ -65,31 +63,30 @@ a{color:var(--accent)}
 .tierline i:nth-child(1){background:var(--pale)}
 .tierline i:nth-child(2){background:var(--coral)}
 .tierline i:nth-child(3){background:var(--green)}
-header.top{padding:34px 0 30px}
+header.top{padding:22px 0 0}
 .toprow{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;flex-wrap:wrap}
 .logo{width:150px;height:auto;display:block}
 .logo .cls-2{fill:var(--logo-ink)}
 .stamp{font-size:13px;color:var(--muted);text-align:right}
 .stamp strong{display:block;color:var(--ink);font-weight:600}
-h1{margin:28px 0 8px;font-size:clamp(32px,5vw,52px);line-height:1.05;letter-spacing:-.025em;font-weight:800;color:var(--head)}
-.lede{max-width:62ch;margin:0;font-size:17px;color:var(--muted)}
+h1{margin:18px 0 4px;font-size:clamp(28px,4vw,40px);line-height:1.05;letter-spacing:-.025em;font-weight:800;color:var(--head)}
+.lede{max-width:70ch;margin:0;font-size:15.5px;color:var(--muted)}
 
-/* Steps */
-.steps{display:grid;grid-template-columns:repeat(3,1fr) 1.1fr;gap:0;background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
-.step{padding:22px 22px 24px;border-right:1px solid var(--line)}
-.step .n{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--green);color:#fff;font-weight:800;font-size:13px;margin-bottom:10px}
-:root[data-theme="dark"] .step .n{background:var(--t-l)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .step .n{background:var(--t-l)}}
-.step h2{margin:0 0 4px;font-size:15.5px;font-weight:700;color:var(--head)}
-.step p{margin:0;font-size:13.5px;color:var(--muted)}
-.step.ask{background:var(--soft);border-right:0}
-.step.ask h2{font-size:15px}
-.step.ask a{font-weight:700;text-decoration:none;border-bottom:1.5px solid currentColor}
+/* Steps strip */
+.steps{list-style:none;margin:18px 0 0;padding:12px 0;display:grid;grid-template-columns:repeat(3,1fr) 1.05fr;gap:18px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+.steps li{display:flex;gap:10px;align-items:flex-start;line-height:1.45}
+.steps b{color:var(--ink);font-weight:700}
+.steps .n{flex:none;display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--green);color:#fff;font-weight:800;font-size:11.5px;margin-top:-1px}
+:root[data-theme="dark"] .steps .n{background:var(--t-l)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .steps .n{background:var(--t-l)}}
+.steps .ask{padding-left:18px;border-left:1px solid var(--line)}
+.steps .ask a{font-weight:700;text-decoration:none;border-bottom:1.5px solid currentColor}
 
-/* Rating scale */
-.scale{display:grid;grid-template-columns:1.25fr 1fr;gap:40px;padding-top:44px;padding-bottom:8px;align-items:start}
-.scale h2,.finder h2{margin:0 0 6px;font-size:22px;letter-spacing:-.01em;font-weight:800;color:var(--head)}
-.scale p.sub{margin:0 0 20px;color:var(--muted);max-width:56ch}
+/* Rating guide panel */
+.guide{display:grid;grid-template-columns:1.25fr 1fr;gap:36px;margin:0 0 14px;padding:20px 22px;background:var(--card);border:1px solid var(--line);border-radius:14px}
+.guide[hidden]{display:none}
+.guide h3{margin:0 0 4px;font-size:15px;font-weight:800;color:var(--head)}
+.guide p.sub{margin:0 0 14px;color:var(--muted);font-size:13.5px;max-width:56ch}
 .ladder{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
 .rung{height:14px;border-radius:4px}
 .rung.s{background:var(--t-s)} .rung.a{background:var(--t-a)} .rung.l{background:var(--t-l)}
@@ -124,9 +121,7 @@ h1{margin:28px 0 8px;font-size:clamp(32px,5vw,52px);line-height:1.05;letter-spac
 .pill.other{background:var(--soft);color:var(--muted)}
 
 /* Finder */
-.finder{padding-top:40px;padding-bottom:60px}
-.findhead{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:16px}
-.findhead p{margin:0;color:var(--muted)}
+.finder{padding-top:4px;padding-bottom:60px}
 .tools{display:flex;gap:8px;flex-wrap:wrap}
 .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;color:var(--accent);cursor:pointer}
 .btn:hover{background:var(--soft)}
@@ -156,11 +151,46 @@ select{background:var(--card);border:1px solid var(--line);border-radius:12px;pa
 .chip .c{color:var(--muted);font-weight:500}
 .dot.s{background:var(--t-s)} .dot.a{background:var(--t-a)} .dot.l{background:var(--t-l)} .dot.p{border:1.5px dashed var(--muted)}
 .spacer{flex:1}
-.reset{border:0;background:none;color:var(--accent);font-weight:700;font-size:13px;cursor:pointer;padding:6px 4px}
+.reset{border:0;background:none;color:var(--accent);font-weight:700;font-size:13px;cursor:pointer;padding:4px 4px;margin-left:10px}
 .reset[hidden]{display:none}
-.count{font-size:13px;color:var(--muted);margin:14px 2px 10px}
+.listbar{display:flex;justify-content:space-between;align-items:center;gap:10px 16px;flex-wrap:wrap;margin:12px 0 10px}
+.count{font-size:13px;color:var(--muted);margin:0 2px}
+.legend{display:inline-flex;gap:12px;font-size:12.5px;color:var(--muted);margin-right:6px}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+.tools{align-items:center}
+#guideBtn[aria-expanded="true"]{background:var(--soft);border-color:var(--accent)}
 .count b{color:var(--ink)}
 
+.morebtn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 14px;font-size:13px;font-weight:700;color:var(--accent);cursor:pointer}
+.morebtn svg{width:14px;height:14px;transition:transform .2s}
+.morebtn[aria-expanded="true"] svg{transform:rotate(180deg)}
+.morebtn[hidden]{display:none}
+.badge:empty{display:none}
+.badge{background:var(--green);color:#fff;border-radius:999px;font-size:11px;min-width:19px;height:19px;display:inline-grid;place-items:center;padding:0 5px}
+.morepanel{margin-top:12px;padding:16px 18px;background:var(--card);border:1px solid var(--line);border-radius:14px;display:grid;gap:12px}
+.morepanel .group > span{min-width:92px}
+.morepanel[hidden]{display:none}
+.morenote{margin:0;font-size:12px;color:var(--muted)}
+.aka{font-size:12px;color:var(--muted);margin-top:-3px}
+.filtbtn{display:inline-flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:13.5px;font-weight:700;color:var(--accent);cursor:pointer}
+.filtbtn:hover{background:var(--soft)}
+.filtbtn svg{width:16px;height:16px}
+.filtbtn .chev{width:14px;height:14px;transition:transform .2s}
+.filtbtn[aria-expanded="true"]{background:var(--soft);border-color:var(--accent)}
+.filtbtn[aria-expanded="true"] .chev{transform:rotate(180deg)}
+.filtbtn.on{border-color:var(--accent)}
+.filterpanel{margin-top:10px;padding:16px 18px;background:var(--card);border:1px solid var(--line);border-radius:14px;display:grid;gap:14px}
+.filterpanel[hidden]{display:none}
+@media (prefers-reduced-motion:no-preference){.filterpanel:not([hidden]){animation:drop .18s ease-out}}
+@keyframes drop{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.fchips{display:flex;flex-wrap:wrap;gap:10px 22px}
+.facetrow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.facetrow[hidden]{display:none}
+.fsel{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fsel span{font-size:12px;font-weight:600;color:var(--muted);padding-left:2px}
+.fsel select{width:100%;padding-top:9px;padding-bottom:9px;font-size:13.5px}
+select.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background-color:var(--soft)}
 /* Results list */
 .list{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
 .lhead,.entry{display:grid;grid-template-columns:minmax(220px,1.05fr) 2fr}
@@ -198,15 +228,25 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 /* Responsive */
 @media (max-width:920px){
   .steps{grid-template-columns:1fr 1fr}
-  .step:nth-child(2){border-right:0}
-  .step:nth-child(-n+2){border-bottom:1px solid var(--line)}
-  .scale{grid-template-columns:1fr;gap:30px}
+  .steps .ask{padding-left:0;border-left:0}
+  .guide{grid-template-columns:1fr;gap:22px}
 }
 @media (max-width:720px){
   .wrap{padding-left:16px;padding-right:16px}
-  .steps{grid-template-columns:1fr}
-  .step{border-right:0;border-bottom:1px solid var(--line)}
-  .step.ask{border-bottom:0}
+  .steps{grid-template-columns:1fr;gap:8px}
+  .legend{display:none}
+  #cat{flex:1 1 100%}
+  .facetrow{grid-template-columns:1fr 1fr}
+  #sort{flex:1 1 0;min-width:0}
+  .fchips{flex-direction:column;gap:10px}
+  .fchips .group{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  .fchips .group::-webkit-scrollbar{display:none}
+  .filtbtn{flex:1 1 auto;justify-content:center}
+  .filterpanel{padding:14px}
+  .chip,.morebtn{white-space:nowrap}
+  .steps{font-size:12.5px}
+  .listbar .tools{width:100%}
+  .listbar .btn{flex:1 1 auto;justify-content:center;padding:8px 10px}
   .lhead{display:none}
   .entry{grid-template-columns:1fr;gap:10px;padding:16px}
   .lines li{grid-template-columns:1fr;gap:6px;padding:8px 0}
@@ -221,7 +261,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 /* Print / PDF */
 @media print{
   :root{--bg:#fff;--card:#fff;--shadow:none}
-  .controls,.tools,.shortbar,.star,.findhead p{display:none!important}
+  .controls,.tools,.shortbar,.star,.steps{display:none!important}
   .finder{padding-top:10px!important}
   .entry{break-inside:avoid}
   .span i{-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -266,51 +306,18 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
       <div class="stamp"><strong id="approved"></strong><span id="updated"></span></div>
     </div>
     <h1>Rated Supplier List</h1>
-    <p class="lede">Suppliers in the MindClick network and how their products are rated under MSAP, by product category. Use it to shortlist vendors for your project and see where each one stands.</p>
+    <p class="lede">Suppliers in the MindClick network and their MSAP ratings by product category.</p>
+    <ol class="steps" aria-label="How to use this list">
+      <li><span class="n">1</span><span><b>Find suppliers</b> you’re considering below.</span></li>
+      <li><span class="n">2</span><span><b>Send MindClick</b> the specific products you’re considering from them.</span></li>
+      <li><span class="n">3</span><span><b>Within 48 hours</b>, MindClick confirms which are rated and shares the ratings.</span></li>
+      <li class="ask"><span><b>Supplier not listed?</b> Contact <span class="cname"></span> at <a class="cmail" href="#"></a></span></li>
+    </ol>
   </div>
 </header>
 
-<section class="wrap" aria-label="How to use this list">
-  <div class="steps">
-    <div class="step"><span class="n">1</span><h2>Find suppliers</h2><p>Search or filter this list for the suppliers you’re considering.</p></div>
-    <div class="step"><span class="n">2</span><h2>Send your product list</h2><p>For suppliers on the list, send MindClick the specific products you’re considering from them.</p></div>
-    <div class="step"><span class="n">3</span><h2>Get product ratings</h2><p>Within 48 hours, MindClick confirms which of those products are currently rated and shares their ratings.</p></div>
-    <div class="step ask"><h2>Supplier not on the list?</h2><p>Contact <span class="cname"></span> at <a class="cmail" href="#"></a> to refer a supplier to our network.</p></div>
-  </div>
-</section>
 
-<section class="wrap scale" aria-labelledby="scaleh">
-  <div>
-    <h2 id="scaleh">How to read a rating</h2>
-    <p class="sub">MSAP ratings have three levels. A supplier’s rating covers its rated products in that category, so it can be a single level or a range.</p>
-    <div class="ladder" aria-hidden="true"><div class="rung s"></div><div class="rung a"></div><div class="rung l"></div></div>
-    <div class="rungnames"><span>Starter<small>Entry level</small></span><span>Achiever<small>Middle level</small></span><span>Leader<small>Highest level</small></span></div>
-    <div class="examples">
-      <div class="ex"><span class="rate"><span class="span"><i class="s"></i><i class="a"></i><i class="l on"></i></span></span><span><b>Leader</b>: every rated product in the category is at Leader.</span></div>
-      <div class="ex"><span class="rate"><span class="span"><i class="s"></i><i class="a on"></i><i class="l on"></i></span></span><span><b>Achiever–Leader</b>: rated products range from Achiever to Leader. MindClick confirms each product in step 3.</span></div>
-      <div class="ex"><span class="rate proc"><span class="span proc"><i></i><i></i><i></i></span></span><span><b>In process</b>: the assessment is under way and there’s no rating yet.</span></div>
-    </div>
-  </div>
-  <div>
-    <h2>Supplier status</h2>
-    <p class="sub">Where each supplier is in the program.</p>
-    <div class="statuskey">
-      <div><span class="pill Active">Active</span><span>Rating is current.</span></div>
-      <div><span class="pill Expiring">Expiring</span><span>Rating is due for renewal. Confirm current ratings with MindClick before specifying.</span></div>
-      <div><span class="pill New">New</span><span>Recently joined the network. Ratings are usually in process.</span></div>
-    </div>
-  </div>
-</section>
-
-<section class="wrap finder" aria-labelledby="findh">
-  <div class="findhead">
-    <div><h2 id="findh">Suppliers</h2><p>Shortlist suppliers as you go, then send the list to MindClick.</p></div>
-    <div class="tools">
-      <button class="btn" id="pdfBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v7H6z"/></svg>Print or save PDF</button>
-      <button class="btn primary" id="csvBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Download CSV</button>
-    </div>
-  </div>
-
+<section class="wrap finder" aria-label="Suppliers">
   <div class="controls">
     <div class="crow">
       <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
@@ -324,16 +331,48 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
         <button type="button" data-view="supplier" aria-pressed="true">By supplier</button>
         <button type="button" data-view="category" aria-pressed="false">By category</button>
       </div>
+      <button class="filtbtn" id="filtBtn" type="button" aria-expanded="false" aria-controls="filterPanel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>Filters<span class="badge" id="filtCount"></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
     </div>
-    <div class="crow">
-      <div class="group" id="tierChips"><span>Rating includes</span></div>
-      <div class="group" id="statusChips"><span>Status</span></div>
-      <div class="spacer"></div>
-      <button class="reset" id="reset" type="button" hidden>Clear filters</button>
+    <div class="filterpanel" id="filterPanel" hidden>
+      <div class="fchips">
+        <div class="group" id="tierChips"><span>Rating includes</span></div>
+        <div class="group" id="statusChips"><span>Status</span></div>
+      </div>
+      <div class="facetrow" id="facetRow"></div>
     </div>
   </div>
 
-  <p class="count" id="count" aria-live="polite"></p>
+  <div class="listbar">
+    <p class="count"><span id="count" aria-live="polite"></span><button class="reset" id="reset" type="button" hidden>Clear filters</button></p>
+    <div class="tools">
+      <span class="legend" aria-hidden="true"><span><i class="dot s"></i>Starter</span><span><i class="dot a"></i>Achiever</span><span><i class="dot l"></i>Leader</span></span>
+      <button class="btn" id="guideBtn" type="button" aria-expanded="false" aria-controls="guide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.3M12 17h.01"/></svg>How to read ratings</button>
+      <button class="btn" id="pdfBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v7H6z"/></svg>Print or save PDF</button>
+      <button class="btn primary" id="csvBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Download CSV</button>
+    </div>
+  </div>
+  <div class="guide" id="guide" hidden>
+  <div>
+    <h3>Ratings</h3>
+    <p class="sub">MSAP ratings have three levels. A supplier’s rating covers its rated products in that category, so it can be a single level or a range.</p>
+    <div class="ladder" aria-hidden="true"><div class="rung s"></div><div class="rung a"></div><div class="rung l"></div></div>
+    <div class="rungnames"><span>Starter<small>Entry level</small></span><span>Achiever<small>Middle level</small></span><span>Leader<small>Highest level</small></span></div>
+    <div class="examples">
+      <div class="ex"><span class="rate"><span class="span"><i class="s"></i><i class="a"></i><i class="l on"></i></span></span><span><b>Leader</b>: every rated product in the category is at Leader.</span></div>
+      <div class="ex"><span class="rate"><span class="span"><i class="s"></i><i class="a on"></i><i class="l on"></i></span></span><span><b>Achiever–Leader</b>: rated products range from Achiever to Leader. MindClick confirms each product in step 3.</span></div>
+      <div class="ex"><span class="rate proc"><span class="span proc"><i></i><i></i><i></i></span></span><span><b>In process</b>: the assessment is under way and there’s no rating yet.</span></div>
+    </div>
+  </div>
+  <div>
+    <h3>Supplier status</h3>
+    <p class="sub">Where each supplier is in the program.</p>
+    <div class="statuskey">
+      <div><span class="pill Active">Active</span><span>Rating is current.</span></div>
+      <div><span class="pill Expiring">Expiring</span><span>Rating is due for renewal. Confirm current ratings with MindClick before specifying.</span></div>
+      <div><span class="pill New">New</span><span>Recently joined the network. Ratings are usually in process.</span></div>
+    </div>
+  </div>
+  </div>
   <div class="list" id="list"></div>
 </section>
 
@@ -357,37 +396,14 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 /* ===================== CONFIG ===================== */
 const CONFIG = {
   approved: "October 2026",
-  updated: "2026-10-20T15:21:08",
+  updated: "2026-10-20T15:25:00",
   contactName: "Allison Pine",
   contactEmail: "apine@mindclick.com",
   shortlistEmail: "apine@mindclick.com"
 };
 
-/* ===================== DATA (replace with export) ===================== */
-const ROWS = /*@DATA*/[
-  {"supplier":"Artco International","status":"Expiring","category":"Casegoods","rating":"Achiever-Leader"},
-  {"supplier":"Arteriors Hospitality","status":"Expiring","category":"Art, Murals, Paintings + Sculpture","rating":"Starter-Achiever"},
-  {"supplier":"Arteriors Hospitality","status":"Expiring","category":"Casegoods","rating":"Achiever"},
-  {"supplier":"Arteriors Hospitality","status":"Expiring","category":"Glass, Films + Mirrors","rating":"Achiever"},
-  {"supplier":"Arteriors Hospitality","status":"Expiring","category":"Lighting, Bulbs + Shades","rating":"Achiever"},
-  {"supplier":"Arteriors Hospitality","status":"Expiring","category":"Seating + Upholstered Furniture","rating":"Achiever"},
-  {"supplier":"Arteriors Hospitality","status":"Expiring","category":"Tables","rating":"Achiever"},
-  {"supplier":"ASCH, LLC","status":"New","category":"Casegoods","rating":"In Process"},
-  {"supplier":"AtmosAir","status":"New","category":"MEP","rating":"In Process"},
-  {"supplier":"Ava by Novalis","status":"Expiring","category":"Flooring","rating":"Leader"},
-  {"supplier":"BERMANFALK Hospitality Group","status":"Active","category":"Casegoods","rating":"Achiever-Leader"},
-  {"supplier":"Brintons","status":"Expiring","category":"Carpet + Area Rugs","rating":"Leader"},
-  {"supplier":"Brown Jordan","status":"Expiring","category":"Outdoor Furniture + Site Furniture","rating":"Starter-Achiever"},
-  {"supplier":"Bryan Ashley","status":"Active","category":"Casegoods","rating":"Starter-Leader"},
-  {"supplier":"Bryan Ashley","status":"Active","category":"Seating + Upholstered Furniture","rating":"Starter-Leader"},
-  {"supplier":"BSF","status":"Active","category":"Casegoods","rating":"Achiever-Leader"},
-  {"supplier":"CM Hospitality","status":"Expiring","category":"Carpet + Area Rugs","rating":"Leader"},
-  {"supplier":"CM Hospitality","status":"Expiring","category":"Flooring","rating":"Achiever"},
-  {"supplier":"Daltile","status":"Expiring","category":"Countertops","rating":"Achiever"},
-  {"supplier":"Daltile","status":"Expiring","category":"Tile","rating":"Leader"},
-  {"supplier":"Dickson Furniture Manufacturers","status":"Active","category":"Casegoods","rating":"Achiever-Leader"},
-  {"supplier":"Dometic","status":"Active","category":"Equipment","rating":"Starter-Leader"}
-]/*@END*/;
+/* ===================== DATA (filled by build_supplier_list.py) ===================== */
+const DATA = /*@DATA*/{"facets":{"space":["Event/Meeting Spaces","Guestrooms/Corridor","Office Spaces","Public Space","Spa"],"tier":["Luxury","Upper Upscale","Upscale","Upper Midscale","Midscale"],"ptype":["Conversion","Look Back","New Build","Office Renovation","Renovation"],"sector":["Hospitality","Multi-Family Housing","Workplace"]},"ctxKeys":["space","tier","ptype","sector"],"rows":[{"supplier":"Andaaz Manufacturing","category":"Casegoods","status":"Active","rating":"Achiever","ctx":[[-1,-1,-1,-1]]},{"supplier":"Andaaz Manufacturing","category":"Lighting, Bulbs + Shades","status":"Active","rating":"Achiever","ctx":[[-1,-1,-1,-1]]},{"supplier":"Artco International","category":"Casegoods","status":"Expiring","rating":"Achiever-Leader","aka":["Artco Hospitality Furnishings"],"space":[1,3,4],"tier":[0,1],"ptype":[4],"sector":[0],"ctx":[[-1,0,4,0],[-1,1,4,0],[1,0,4,0],[1,1,4,0],[3,1,4,0],[4,0,4,0]]},{"supplier":"Arteriors Hospitality","category":"Art, Murals, Paintings + Sculpture","status":"Expiring","rating":"Starter-Achiever","aka":["Arteriors Contract","Arteriors Contract - Accessories"],"space":[0,1,2,3],"tier":[0,1,2,3],"ptype":[1,3,4],"sector":[0,1,2],"ctx":[[-1,-1,-1,-1],[-1,0,4,0],[-1,1,4,0],[0,0,4,0],[0,1,4,0],[1,1,1,0],[1,1,4,0],[1,2,4,0],[1,3,4,0],[2,-1,3,2],[3,0,1,0],[3,0,1,1],[3,0,4,0],[3,1,4,0],[3,2,4,0],[3,3,4,0]]},{"supplier":"Arteriors Hospitality","category":"Casegoods","status":"Expiring","rating":"Achiever","aka":["Arteriors Contract"],"space":[0,1,2,3],"tier":[0,1,2,3],"ptype":[1,3,4],"sector":[0,1,2],"ctx":[[-1,0,4,0],[-1,1,4,0],[0,0,4,0],[0,1,4,0],[1,1,1,0],[1,1,4,0],[1,2,4,0],[1,3,4,0],[2,-1,3,2],[3,0,1,0],[3,0,1,1],[3,0,4,0],[3,1,4,0],[3,2,4,0],[3,3,4,0]]},{"supplier":"Arteriors Hospitality","category":"Glass, Films + Mirrors","status":"Expiring","rating":"Achiever","aka":["Arteriors Contract"],"space":[0,1,2,3],"tier":[0,1,2,3],"ptype":[1,3,4],"sector":[0,1,2],"ctx":[[-1,0,4,0],[-1,1,4,0],[0,0,4,0],[0,1,4,0],[1,1,1,0],[1,1,4,0],[1,2,4,0],[1,3,4,0],[2,-1,3,2],[3,0,1,0],[3,0,1,1],[3,0,4,0],[3,1,4,0],[3,2,4,0],[3,3,4,0]]},{"supplier":"Arteriors Hospitality","category":"Lighting, Bulbs + Shades","status":"Expiring","rating":"Achiever","aka":["Arteriors Contract"],"space":[0,1,2,3],"tier":[0,1,2,3],"ptype":[1,3,4],"sector":[0,1,2],"ctx":[[-1,0,4,0],[-1,1,4,0],[0,0,4,0],[0,1,4,0],[1,1,1,0],[1,1,4,0],[1,2,4,0],[1,3,4,0],[2,-1,3,2],[3,0,1,0],[3,0,1,1],[3,0,4,0],[3,1,4,0],[3,2,4,0],[3,3,4,0]]},{"supplier":"Arteriors Hospitality","category":"Seating + Upholstered Furniture","status":"Expiring","rating":"Achiever","aka":["Arteriors Contract"],"space":[0,1,2,3],"tier":[0,1,2,3],"ptype":[1,3,4],"sector":[0,1,2],"ctx":[[-1,0,4,0],[-1,1,4,0],[0,0,4,0],[0,1,4,0],[1,1,1,0],[1,1,4,0],[1,2,4,0],[1,3,4,0],[2,-1,3,2],[3,0,1,0],[3,0,1,1],[3,0,4,0],[3,1,4,0],[3,2,4,0],[3,3,4,0]]},{"supplier":"Arteriors Hospitality","category":"Tables","status":"Expiring","rating":"Achiever","aka":["Arteriors Contract"],"space":[0,1,2,3],"tier":[0,1,2,3],"ptype":[1,3,4],"sector":[0,1,2],"ctx":[[-1,0,4,0],[-1,1,4,0],[0,0,4,0],[0,1,4,0],[1,1,1,0],[1,1,4,0],[1,2,4,0],[1,3,4,0],[2,-1,3,2],[3,0,1,0],[3,0,1,1],[3,0,4,0],[3,1,4,0],[3,2,4,0],[3,3,4,0]]},{"supplier":"ASCH, LLC","category":"Casegoods","status":"New","rating":"In Process","ctx":[[-1,-1,-1,-1]]},{"supplier":"AtmosAir","category":"MEP","status":"New","rating":"In Process","ctx":[[-1,-1,-1,-1]]},{"supplier":"Ava by Novalis","category":"Flooring","status":"Expiring","rating":"Leader","ctx":[[-1,-1,-1,-1]]},{"supplier":"BERMANFALK Hospitality Group","category":"Casegoods","status":"Active","rating":"Achiever-Leader","aka":["BermanFalk"],"space":[1],"tier":[0,1,2],"ptype":[1,4],"sector":[0],"ctx":[[-1,0,4,0],[-1,1,4,0],[-1,2,4,0],[1,0,1,0],[1,0,4,0],[1,1,4,0],[1,2,4,0]]},{"supplier":"Brintons","category":"Carpet + Area Rugs","status":"Expiring","rating":"Leader","space":[0,1,3],"tier":[0,1,3],"ptype":[4],"sector":[0],"ctx":[[-1,1,4,0],[0,1,4,0],[1,0,4,0],[1,1,4,0],[1,3,4,0],[3,1,4,0]]},{"supplier":"Brown Jordan","category":"Outdoor Furniture + Site Furniture","status":"Expiring","rating":"Starter-Achiever","space":[1,3,4],"tier":[0,1,3],"ptype":[4],"sector":[0],"ctx":[[-1,1,4,0],[1,0,4,0],[1,1,4,0],[1,3,4,0],[3,1,4,0],[4,0,4,0]]},{"supplier":"Bryan Ashley","category":"Casegoods","status":"Active","rating":"Starter-Leader","space":[1],"tier":[1,2,4],"ptype":[1,4],"sector":[0],"ctx":[[-1,1,4,0],[-1,2,4,0],[1,1,4,0],[1,2,4,0],[1,4,1,0]]},{"supplier":"Bryan Ashley","category":"Seating + Upholstered Furniture","status":"Active","rating":"Starter-Leader","space":[1],"tier":[1,2,4],"ptype":[1,4],"sector":[0],"ctx":[[-1,1,4,0],[-1,2,4,0],[1,1,4,0],[1,2,4,0],[1,4,1,0]]},{"supplier":"BSF","category":"Casegoods","status":"Active","rating":"Achiever-Leader","space":[0,1,3,4],"tier":[0,1,3],"ptype":[0,1,4],"sector":[0],"ctx":[[0,0,4,0],[1,1,0,0],[1,3,1,0],[3,3,1,0],[4,0,4,0]]},{"supplier":"CM Hospitality","category":"Carpet + Area Rugs","status":"Expiring","rating":"Leader","aka":["CM Hospitality Carpet"],"space":[1],"tier":[1,3],"ptype":[4],"sector":[0],"ctx":[[1,1,4,0],[1,3,4,0]]},{"supplier":"CM Hospitality","category":"Flooring","status":"Expiring","rating":"Achiever","aka":["CM Hospitality Carpet"],"space":[1],"tier":[1,3],"ptype":[4],"sector":[0],"ctx":[[1,1,4,0],[1,3,4,0]]},{"supplier":"Daltile","category":"Countertops","status":"Expiring","rating":"Achiever","space":[0,1,3,4],"tier":[0,1,2,3,4],"ptype":[0,1,4],"sector":[0],"ctx":[[-1,1,0,0],[-1,1,4,0],[-1,3,4,0],[0,1,4,0],[1,0,4,0],[1,1,1,0],[1,1,4,0],[1,2,1,0],[1,2,4,0],[1,3,4,0],[1,4,1,0],[3,1,0,0],[3,1,1,0],[3,1,4,0],[3,2,4,0],[3,3,4,0],[3,4,1,0],[4,0,4,0]]},{"supplier":"Daltile","category":"Tile","status":"Expiring","rating":"Leader","space":[0,1,3,4],"tier":[0,1,2,3,4],"ptype":[0,1,4],"sector":[0],"ctx":[[-1,1,0,0],[-1,1,4,0],[-1,3,4,0],[0,1,4,0],[1,0,4,0],[1,1,1,0],[1,1,4,0],[1,2,1,0],[1,2,4,0],[1,3,4,0],[1,4,1,0],[3,1,0,0],[3,1,1,0],[3,1,4,0],[3,2,4,0],[3,3,4,0],[3,4,1,0],[4,0,4,0]]},{"supplier":"Dickson Furniture Manufacturers","category":"Casegoods","status":"Active","rating":"Achiever-Leader","ctx":[[-1,-1,-1,-1]]},{"supplier":"Dometic","category":"Equipment","status":"Active","rating":"Starter-Leader","space":[1,3],"tier":[0,1],"ptype":[1,2,4],"sector":[0],"ctx":[[-1,1,4,0],[1,0,1,0],[1,0,4,0],[1,1,1,0],[1,1,2,0],[1,1,4,0],[3,1,4,0]]},{"supplier":"Eaton Fine Art","category":"Art, Murals, Paintings + Sculpture","status":"Active","rating":"Starter-Leader","space":[0],"tier":[0],"ptype":[4],"sector":[0],"ctx":[[0,0,4,0]]},{"supplier":"Eaton Fine Art","category":"Wallcoverings","status":"Active","rating":"Achiever","space":[0],"tier":[0],"ptype":[4],"sector":[0],"ctx":[[0,0,4,0]]},{"supplier":"Ecore International","category":"Flooring","status":"Expiring","rating":"Achiever","aka":["Ecore"],"space":[3],"tier":[1,2,3,4],"ptype":[1,4],"sector":[0],"ctx":[[3,1,4,0],[3,2,4,0],[3,3,4,0],[3,4,1,0]]},{"supplier":"Encore Hospitality","category":"Carpet + Area Rugs","status":"Active","rating":"Leader","aka":["Encore Hospitality Carpet"],"ctx":[[-1,-1,-1,-1]]},{"supplier":"Fabricut Contract","category":"Fabrics + Leather","status":"Active","rating":"Starter-Achiever","space":[0,1,3,4],"tier":[0,1,2,3],"ptype":[0,1,2,4],"sector":[0],"ctx":[[-1,0,4,0],[-1,1,4,0],[-1,3,4,0],[0,0,4,0],[1,0,1,0],[1,0,4,0],[1,1,1,0],[1,1,2,0],[1,1,4,0],[1,3,4,0],[3,0,1,0],[3,0,4,0],[3,1,0,0],[3,1,4,0],[3,2,1,0],[3,2,4,0],[4,0,4,0]]},{"supplier":"Fairmont Designs Hospitality Group","category":"Casegoods","status":"Active","rating":"Leader","space":[0,1,3],"tier":[1,2,4],"ptype":[1,4],"sector":[0],"ctx":[[-1,1,4,0],[0,1,4,0],[1,2,4,0],[1,4,1,0],[3,1,4,0]]},{"supplier":"Global Furniture Group","category":"Seating + Upholstered Furniture","status":"Expiring","rating":"Leader","space":[0],"tier":[0],"ptype":[4],"sector":[0],"ctx":[[0,0,4,0]]},{"supplier":"Global Furniture Group","category":"Workspace + Office Furniture","status":"Expiring","rating":"Leader","space":[0],"tier":[0],"ptype":[4],"sector":[0],"ctx":[[0,0,4,0]]},{"supplier":"Grand Rapids Chair Company","category":"Seating + Upholstered Furniture","status":"Active","rating":"Leader","space":[3],"tier":[2],"ptype":[4],"sector":[0],"ctx":[[3,2,4,0]]},{"supplier":"Grand Rapids Chair Company","category":"Tables","status":"Active","rating":"Achiever-Leader","space":[3],"tier":[2],"ptype":[4],"sector":[0],"ctx":[[3,2,4,0]]},{"supplier":"HF Collection, Inc.","category":"Casegoods","status":"Active","rating":"Achiever-Leader","aka":["HF Collection"],"space":[1,3],"tier":[1,2],"ptype":[1,4],"sector":[0],"ctx":[[1,1,1,0],[1,2,1,0],[3,1,4,0]]},{"supplier":"HF Collection, Inc.","category":"Seating + Upholstered Furniture","status":"Active","rating":"Achiever","aka":["HF Collection"],"space":[1,3],"tier":[1,2],"ptype":[1,4],"sector":[0],"ctx":[[1,1,1,0],[1,2,1,0],[3,1,4,0]]},{"supplier":"HF Collection, Inc.","category":"Textile Accessories + Bedding Accessories","status":"Active","rating":"Starter","aka":["HF Collection"],"space":[1,3],"tier":[1,2],"ptype":[1,4],"sector":[0],"ctx":[[1,1,1,0],[1,2,1,0],[3,1,4,0]]},{"supplier":"Identity Group","category":"Signage, Banners + Plaques","status":"Active","rating":"Achiever-Leader","space":[3],"tier":[3],"ptype":[4],"sector":[0],"ctx":[[3,3,4,0]]},{"supplier":"Illumination Lighting","category":"Lighting, Bulbs + Shades","status":"Active","rating":"Achiever-Leader","space":[1,4],"tier":[0,1,3],"ptype":[4],"sector":[0],"ctx":[[-1,3,4,0],[1,1,4,0],[4,0,4,0]]},{"supplier":"ISA International","category":"Seating + Upholstered Furniture","status":"Active","rating":"Leader","space":[3],"tier":[1,3,4],"ptype":[1,4],"sector":[0],"ctx":[[3,1,4,0],[3,3,4,0],[3,4,1,0]]},{"supplier":"J.G. Edelen","category":"Bath + Plumbing Products","status":"Expiring","rating":"Achiever","space":[1],"tier":[4],"ptype":[1],"sector":[0],"ctx":[[1,4,1,0]]},{"supplier":"J.G. Edelen","category":"Casegoods","status":"Expiring","rating":"Achiever-Leader","space":[1],"tier":[4],"ptype":[1],"sector":[0],"ctx":[[1,4,1,0]]},{"supplier":"J.G. Edelen","category":"Closet + Storage Systems","status":"Expiring","rating":"Leader","space":[1],"tier":[4],"ptype":[1],"sector":[0],"ctx":[[1,4,1,0]]},{"supplier":"Jamison Bedding","category":"Beds","status":"Expiring","rating":"Leader","space":[1],"tier":[1,4],"ptype":[1],"sector":[0],"ctx":[[1,1,1,0],[1,4,1,0]]},{"supplier":"JDT Worldwide","category":"Textile Accessories + Bedding Accessories","status":"Active","rating":"Leader","ctx":[[-1,-1,-1,-1]]},{"supplier":"Kalisher","category":"Art, Murals, Paintings + Sculpture","status":"Expiring","rating":"Starter-Achiever","space":[1],"tier":[1],"ptype":[4],"sector":[0],"ctx":[[1,1,4,0]]},{"supplier":"Kalisher","category":"Glass, Films + Mirrors","status":"Expiring","rating":"Leader","space":[1],"tier":[1],"ptype":[4],"sector":[0],"ctx":[[1,1,4,0]]},{"supplier":"Kalisher","category":"Wallcoverings","status":"Expiring","rating":"Achiever","space":[1],"tier":[1],"ptype":[4],"sector":[0],"ctx":[[1,1,4,0]]},{"supplier":"Kartri Sales","category":"Bath + Plumbing Products","status":"Active","rating":"Achiever-Leader","space":[1],"tier":[1,2,4],"ptype":[1,4],"sector":[0],"ctx":[[1,1,1,0],[1,1,4,0],[1,2,4,0],[1,4,1,0]]},{"supplier":"Kimball Hospitality","category":"Casegoods","status":"Active","rating":"Leader","space":[1,3],"tier":[1,2,3,4],"ptype":[1,4],"sector":[0],"ctx":[[-1,1,4,0],[1,2,4,0],[1,4,1,0],[3,3,1,0],[3,3,4,0],[3,4,1,0]]},{"supplier":"Kimball Hospitality","category":"Seating + Upholstered Furniture","status":"Active","rating":"Leader","space":[1,3],"tier":[1,2,3,4],"ptype":[1,4],"sector":[0],"ctx":[[-1,1,4,0],[1,2,4,0],[1,4,1,0],[3,3,1,0],[3,3,4,0],[3,4,1,0]]},{"supplier":"Klem","category":"Casegoods","status":"Expiring","rating":"Leader","space":[1,3],"tier":[1,3],"ptype":[4],"sector":[0],"ctx":[[-1,3,4,0],[1,1,4,0],[1,3,4,0],[3,1,4,0],[3,3,4,0]]},{"supplier":"Kravet Contract","category":"Fabrics + Leather","status":"Expiring","rating":"Achiever-Leader","space":[0,1,3],"tier":[0,1,2,3,4],"ptype":[0,1,4],"sector":[0],"ctx":[[-1,0,4,0],[-1,1,4,0],[0,0,4,0],[1,0,1,0],[1,0,4,0],[1,1,0,0],[1,1,1,0],[1,1,4,0],[1,2,1,0],[1,3,4,0],[3,0,4,0],[3,1,4,0],[3,2,1,0],[3,2,4,0],[3,3,1,0],[3,3,4,0],[3,4,1,0]]},{"supplier":"Kravet Contract","category":"Wallcoverings","status":"Expiring","rating":"Achiever","space":[0,1,3],"tier":[0,1,2,3,4],"ptype":[0,1,4],"sector":[0],"ctx":[[-1,0,4,0],[-1,1,4,0],[0,0,4,0],[1,0,1,0],[1,0,4,0],[1,1,0,0],[1,1,1,0],[1,1,4,0],[1,2,1,0],[1,3,4,0],[3,0,4,0],[3,1,4,0],[3,2,1,0],[3,2,4,0],[3,3,1,0],[3,3,4,0],[3,4,1,0]]},{"supplier":"LebaTex","category":"Fabrics + Leather","status":"Expiring","rating":"Achiever","space":[1,3,4],"tier":[0,1,2,3,4],"ptype":[1,4],"sector":[0],"ctx":[[1,0,4,0],[1,1,1,0],[1,4,1,0],[3,1,4,0],[3,2,1,0],[3,3,4,0],[4,0,4,0]]},{"supplier":"LG Electronics","category":"Multimedia Equipment","status":"Active","rating":"Achiever-Leader","space":[1,3],"tier":[0,1,2,3,4],"ptype":[1,4],"sector":[0],"ctx":[[-1,1,4,0],[-1,3,4,0],[1,1,4,0],[1,2,1,0],[1,2,4,0],[1,3,1,0],[1,3,4,0],[1,4,1,0],[3,0,4,0],[3,1,4,0],[3,3,1,0],[3,4,1,0]]},{"supplier":"Lodging Concepts Manufacturing","category":"Casegoods","status":"Active","rating":"Achiever-Leader","space":[1],"tier":[2],"ptype":[1],"sector":[0],"ctx":[[1,2,1,0]]},{"supplier":"Lodging Concepts Manufacturing","category":"Seating + Upholstered Furniture","status":"Active","rating":"Leader","space":[1],"tier":[2],"ptype":[1],"sector":[0],"ctx":[[1,2,1,0]]},{"supplier":"Lusive Decor","category":"Lighting, Bulbs + Shades","status":"Expiring","rating":"Achiever-Leader","aka":["Lusive"],"space":[0,1,3,4],"tier":[0,1,2],"ptype":[4],"sector":[0],"ctx":[[-1,0,4,0],[-1,1,4,0],[0,0,4,0],[0,1,4,0],[1,0,4,0],[1,1,4,0],[3,1,4,0],[3,2,4,0],[4,0,4,0]]},{"supplier":"Majestic Mirror & Frame","category":"Glass, Films + Mirrors","status":"Expiring","rating":"Achiever","space":[0,1,3,4],"tier":[0,1,2,3,4],"ptype":[0,1,2,4],"sector":[0],"ctx":[[-1,0,4,0],[-1,1,0,0],[-1,1,4,0],[-1,2,4,0],[-1,3,4,0],[0,0,4,0],[1,0,4,0],[1,1,0,0],[1,1,1,0],[1,1,2,0],[1,1,4,0],[1,2,1,0],[1,2,4,0],[1,3,1,0],[1,3,4,0],[1,4,1,0],[3,0,4,0],[3,1,0,0],[3,1,4,0],[3,2,4,0],[3,3,4,0],[3,4,1,0],[4,0,4,0]]},{"supplier":"Majestic Mirror & Frame","category":"Lighting, Bulbs + Shades","status":"Expiring","rating":"Achiever","space":[0,1,3,4],"tier":[0,1,2,3,4],"ptype":[0,1,2,4],"sector":[0],"ctx":[[-1,0,4,0],[-1,1,0,0],[-1,1,4,0],[-1,2,4,0],[-1,3,4,0],[0,0,4,0],[1,0,4,0],[1,1,0,0],[1,1,1,0],[1,1,2,0],[1,1,4,0],[1,2,1,0],[1,2,4,0],[1,3,1,0],[1,3,4,0],[1,4,1,0],[3,0,4,0],[3,1,0,0],[3,1,4,0],[3,2,4,0],[3,3,4,0],[3,4,1,0],[4,0,4,0]]},{"supplier":"Mandy Li Collection","category":"Casegoods","status":"Active","rating":"Achiever-Leader","space":[0,1,3],"tier":[1],"ptype":[4],"sector":[0],"ctx":[[-1,1,4,0],[0,1,4,0],[1,1,4,0],[3,1,4,0]]},{"supplier":"Mannington","category":"Carpet + Area Rugs","status":"Expiring","rating":"Leader","space":[1,3],"tier":[0,1],"ptype":[4],"sector":[0],"ctx":[[1,1,4,0],[3,0,4,0]]},{"supplier":"Mannington","category":"Flooring","status":"Expiring","rating":"Achiever-Leader","space":[1,3],"tier":[0,1],"ptype":[4],"sector":[0],"ctx":[[1,1,4,0],[3,0,4,0]]},{"supplier":"MDC Interior Solutions","category":"Wallcoverings","status":"Expiring","rating":"Starter-Achiever","space":[0,1,3],"tier":[0,1,2,3],"ptype":[1,4],"sector":[0],"ctx":[[-1,1,4,0],[-1,3,4,0],[0,0,4,0],[0,1,4,0],[1,1,4,0],[1,3,4,0],[3,1,4,0],[3,2,4,0],[3,3,1,0],[3,3,4,0]]},{"supplier":"MDC Interior Solutions","category":"Walls","status":"Expiring","rating":"Starter","space":[0,1,3],"tier":[0,1,2,3],"ptype":[1,4],"sector":[0],"ctx":[[-1,1,4,0],[-1,3,4,0],[0,0,4,0],[0,1,4,0],[1,1,4,0],[1,3,4,0],[3,1,4,0],[3,2,4,0],[3,3,1,0],[3,3,4,0]]},{"supplier":"Mittman Hospitality","category":"Casegoods","status":"Active","rating":"Achiever-Leader","space":[1],"tier":[1],"ptype":[4],"sector":[0],"ctx":[[1,1,4,0]]},{"supplier":"Mittman Hospitality","category":"Seating + Upholstered Furniture","status":"Active","rating":"Leader","space":[1],"tier":[1],"ptype":[4],"sector":[0],"ctx":[[1,1,4,0]]},{"supplier":"Mohawk Group's Durkan Hospitality","category":"Carpet + Area Rugs","status":"Expiring","rating":"Leader","space":[0,1,3],"tier":[1,3],"ptype":[1,4],"sector":[0],"ctx":[[0,1,4,0],[1,1,1,0],[1,1,4,0],[1,3,1,0],[1,3,4,0],[3,1,1,0],[3,1,4,0],[3,3,1,0]]},{"supplier":"Mohawk Group's Durkan Hospitality","category":"Flooring","status":"Expiring","rating":"Starter-Leader","space":[0,1,3],"tier":[1,3],"ptype":[1,4],"sector":[0],"ctx":[[0,1,4,0],[1,1,1,0],[1,1,4,0],[1,3,1,0],[1,3,4,0],[3,1,1,0],[3,1,4,0],[3,3,1,0]]},{"supplier":"Monn Carpets","category":"Carpet + Area Rugs","status":"Expiring","rating":"Leader","aka":["Monn Carpet"],"space":[1,3],"tier":[1],"ptype":[4],"sector":[0],"ctx":[[-1,1,4,0],[1,1,4,0],[3,1,4,0]]},{"supplier":"MPL | IMI","category":"Bath + Plumbing Products","status":"Active","rating":"Achiever","space":[1],"tier":[1],"ptype":[0],"sector":[0],"ctx":[[1,1,0,0]]},{"supplier":"MTS Seating","category":"Seating + Upholstered Furniture","status":"Active","rating":"Leader","space":[1,3],"tier":[0,1,2,3,4],"ptype":[0,1,4],"sector":[0],"ctx":[[1,3,1,0],[3,0,4,0],[3,1,0,0],[3,2,1,0],[3,3,1,0],[3,4,1,0]]},{"supplier":"MTS Seating","category":"Tables","status":"Active","rating":"Leader","space":[1,3],"tier":[0,1,2,3,4],"ptype":[0,1,4],"sector":[0],"ctx":[[1,3,1,0],[3,0,4,0],[3,1,0,0],[3,2,1,0],[3,3,1,0],[3,4,1,0]]},{"supplier":"MTS Seating","category":"Workspace + Office Furniture","status":"Active","rating":"Leader","space":[1,3],"tier":[0,1,2,3,4],"ptype":[0,1,4],"sector":[0],"ctx":[[1,3,1,0],[3,0,4,0],[3,1,0,0],[3,2,1,0],[3,3,1,0],[3,4,1,0]]},{"supplier":"Neil Allen Industries","category":"Tables","status":"Expiring","rating":"Leader","space":[1,3],"tier":[0,1,3],"ptype":[4],"sector":[0],"ctx":[[-1,1,4,0],[1,0,4,0],[3,1,4,0],[3,3,4,0]]},{"supplier":"OW Hospitality","category":"Carpet + Area Rugs","status":"Active","rating":"Leader","aka":["Oriental Weavers Hospitality"],"space":[1,3],"tier":[1],"ptype":[0,4],"sector":[0],"ctx":[[1,1,0,0],[1,1,4,0],[3,1,0,0]]},{"supplier":"P/Kaufmann Contract","category":"Bath + Plumbing Products","status":"Active","rating":"Achiever-Leader","space":[1,3],"tier":[0,1,2,3,4],"ptype":[0,1,4],"sector":[0],"ctx":[[-1,0,4,0],[-1,1,0,0],[-1,1,4,0],[-1,3,4,0],[1,0,4,0],[1,1,0,0],[1,1,1,0],[1,1,4,0],[1,2,1,0],[1,3,1,0],[1,3,4,0],[1,4,1,0],[3,0,1,0],[3,1,4,0],[3,2,1,0],[3,2,4,0],[3,3,1,0],[3,3,4,0],[3,4,1,0]]},{"supplier":"P/Kaufmann Contract","category":"Fabrics + Leather","status":"Active","rating":"Achiever-Leader","space":[1,3],"tier":[0,1,2,3,4],"ptype":[0,1,4],"sector":[0],"ctx":[[-1,0,4,0],[-1,1,0,0],[-1,1,4,0],[-1,3,4,0],[1,0,4,0],[1,1,0,0],[1,1,1,0],[1,1,4,0],[1,2,1,0],[1,3,1,0],[1,3,4,0],[1,4,1,0],[3,0,1,0],[3,1,4,0],[3,2,1,0],[3,2,4,0],[3,3,1,0],[3,3,4,0],[3,4,1,0]]},{"supplier":"P/Kaufmann Contract","category":"Textile Accessories + Bedding Accessories","status":"Active","rating":"Achiever-Leader","space":[1,3],"tier":[0,1,2,3,4],"ptype":[0,1,4],"sector":[0],"ctx":[[-1,0,4,0],[-1,1,0,0],[-1,1,4,0],[-1,3,4,0],[1,0,4,0],[1,1,0,0],[1,1,1,0],[1,1,4,0],[1,2,1,0],[1,3,1,0],[1,3,4,0],[1,4,1,0],[3,0,1,0],[3,1,4,0],[3,2,1,0],[3,2,4,0],[3,3,1,0],[3,3,4,0],[3,4,1,0]]},{"supplier":"Peerless-AV","category":"Multimedia Equipment","status":"Expiring","rating":"Leader","space":[1,3],"tier":[0,1,2,3,4],"ptype":[1,4],"sector":[0],"ctx":[[-1,1,4,0],[-1,3,4,0],[1,0,1,0],[1,0,4,0],[1,1,4,0],[1,2,1,0],[1,2,4,0],[1,3,1,0],[1,3,4,0],[1,4,1,0],[3,0,1,0],[3,0,4,0],[3,1,4,0],[3,3,1,0],[3,3,4,0],[3,4,1,0]]},{"supplier":"Phillip Jeffries","category":"Wallcoverings","status":"New","rating":"In Process","space":[0,1,3,4],"tier":[0,1,2,3],"ptype":[1,2,4],"sector":[0,1],"ctx":[[-1,0,4,0],[-1,1,4,0],[0,0,4,0],[0,1,4,0],[1,0,4,0],[1,1,2,0],[1,1,4,0],[1,2,4,0],[1,3,4,0],[3,0,1,0],[3,0,1,1],[3,0,4,0],[3,1,4,0],[4,0,4,0]]},{"supplier":"PI Fine Art","category":"Art, Murals, Paintings + Sculpture","status":"Active","rating":"Leader","space":[1],"tier":[0,1,4],"ptype":[1,4],"sector":[0],"ctx":[[-1,1,4,0],[1,0,4,0],[1,1,4,0],[1,4,1,0]]},{"supplier":"PI Fine Art","category":"Glass, Films + Mirrors","status":"Active","rating":"Leader","space":[1],"tier":[0,1,4],"ptype":[1,4],"sector":[0],"ctx":[[-1,1,4,0],[1,0,4,0],[1,1,4,0],[1,4,1,0]]},{"supplier":"PI Fine Art","category":"Wallcoverings","status":"Active","rating":"Leader","space":[1],"tier":[0,1,4],"ptype":[1,4],"sector":[0],"ctx":[[-1,1,4,0],[1,0,4,0],[1,1,4,0],[1,4,1,0]]},{"supplier":"Quality & Company","category":"Seating + Upholstered Furniture","status":"Active","rating":"Leader","space":[0,1,3],"tier":[0,1,2,3],"ptype":[1,4],"sector":[0],"ctx":[[-1,1,4,0],[0,0,4,0],[1,1,4,0],[1,2,1,0],[3,3,4,0]]},{"supplier":"Quality & Company","category":"Textile Accessories + Bedding Accessories","status":"Active","rating":"Leader","space":[0,1,3],"tier":[0,1,2,3],"ptype":[1,4],"sector":[0],"ctx":[[-1,1,4,0],[0,0,4,0],[1,1,4,0],[1,2,1,0],[3,3,4,0]]},{"supplier":"Richloom Contract","category":"Fabrics + Leather","status":"Expiring","rating":"Achiever-Leader","space":[1,3],"tier":[0,1,2,3],"ptype":[0,1,4],"sector":[0],"ctx":[[-1,1,4,0],[-1,3,4,0],[1,0,4,0],[1,1,1,0],[1,1,4,0],[1,2,1,0],[1,2,4,0],[1,3,1,0],[1,3,4,0],[3,1,0,0],[3,1,4,0],[3,2,1,0],[3,2,4,0],[3,3,1,0],[3,3,4,0]]},{"supplier":"Richloom Contract","category":"Textile Accessories + Bedding Accessories","status":"Expiring","rating":"Achiever-Leader","space":[1,3],"tier":[0,1,2,3],"ptype":[0,1,4],"sector":[0],"ctx":[[-1,1,4,0],[-1,3,4,0],[1,0,4,0],[1,1,1,0],[1,1,4,0],[1,2,1,0],[1,2,4,0],[1,3,1,0],[1,3,4,0],[3,1,0,0],[3,1,4,0],[3,2,1,0],[3,2,4,0],[3,3,1,0],[3,3,4,0]]},{"supplier":"Royal Thai","category":"Carpet + Area Rugs","status":"Expiring","rating":"Leader","aka":["Royal Thai Americas"],"space":[0,1,3],"tier":[0,1],"ptype":[1,4],"sector":[0],"ctx":[[-1,1,4,0],[0,0,4,0],[0,1,4,0],[1,1,4,0],[3,0,1,0],[3,1,4,0]]},{"supplier":"Schwimmer Drapery","category":"Drapery + Bedding Fabrication","status":"Expiring","rating":"Leader","space":[1,3],"tier":[0,2],"ptype":[4],"sector":[0],"ctx":[[-1,0,4,0],[1,0,4,0],[1,2,4,0],[3,2,4,0]]},{"supplier":"Serta Simmons Hospitality","category":"Beds","status":"Expiring","rating":"Achiever-Leader","space":[1],"tier":[0,1,2,3,4],"ptype":[1,2,4],"sector":[0],"ctx":[[-1,0,4,0],[1,0,4,0],[1,1,2,0],[1,2,4,0],[1,3,1,0],[1,4,1,0]]},{"supplier":"Shaw Contract Hospitality","category":"Carpet + Area Rugs","status":"Expiring","rating":"Starter-Leader","space":[0,1,2,3,4],"tier":[0,1,2,3,4],"ptype":[1,3,4],"sector":[0,1,2],"ctx":[[-1,0,4,0],[-1,1,4,0],[0,1,4,0],[1,0,4,0],[1,1,1,0],[1,1,4,0],[1,2,1,0],[1,2,4,0],[1,3,4,0],[1,4,1,0],[2,-1,3,2],[3,0,1,0],[3,0,1,1],[3,2,1,0],[3,2,4,0],[3,3,1,0],[3,3,4,0],[3,4,1,0],[4,0,4,0]]},{"supplier":"Shaw Contract Hospitality","category":"Flooring","status":"Expiring","rating":"Achiever-Leader","space":[0,1,2,3,4],"tier":[0,1,2,3,4],"ptype":[1,3,4],"sector":[0,1,2],"ctx":[[-1,0,4,0],[-1,1,4,0],[0,1,4,0],[1,0,4,0],[1,1,1,0],[1,1,4,0],[1,2,1,0],[1,2,4,0],[1,3,4,0],[1,4,1,0],[2,-1,3,2],[3,0,1,0],[3,0,1,1],[3,2,1,0],[3,2,4,0],[3,3,1,0],[3,3,4,0],[3,4,1,0],[4,0,4,0]]},{"supplier":"Sherwin-Williams Co.","category":"Paints, Stains + Coating","status":"Expiring","rating":"Leader","space":[0,1,2,3,4],"tier":[0,1,2,3,4],"ptype":[0,1,3,4],"sector":[0,1,2],"ctx":[[-1,0,4,0],[-1,1,0,0],[-1,1,4,0],[-1,2,1,0],[-1,2,4,0],[0,1,4,0],[1,0,4,0],[1,1,0,0],[1,1,1,0],[1,1,4,0],[1,2,1,0],[1,2,4,0],[1,3,1,0],[1,3,4,0],[1,4,1,0],[2,-1,3,2],[3,0,1,1],[3,0,4,0],[3,1,0,0],[3,1,1,0],[3,1,4,0],[3,2,4,0],[3,3,1,0],[3,3,4,0],[3,4,1,0],[4,0,4,0],[4,1,4,0]]},{"supplier":"Signature Flooring","category":"Carpet + Area Rugs","status":"Active","rating":"Achiever-Leader","space":[1,4],"tier":[0,1,2,3],"ptype":[0,1,4],"sector":[0],"ctx":[[-1,1,0,0],[1,1,0,0],[1,1,4,0],[1,2,4,0],[1,3,1,0],[4,0,4,0]]},{"supplier":"Signature Flooring","category":"Flooring","status":"Active","rating":"Starter-Achiever","space":[1,4],"tier":[0,1,2,3],"ptype":[0,1,4],"sector":[0],"ctx":[[-1,1,0,0],[1,1,0,0],[1,1,4,0],[1,2,4,0],[1,3,1,0],[4,0,4,0]]},{"supplier":"Standard Textile Co., Inc.","category":"Window Treatments","status":"Expiring","rating":"Starter","space":[1],"tier":[1],"ptype":[4],"sector":[0],"ctx":[[1,1,4,0]]},{"supplier":"Sundrella","category":"Outdoor Furniture + Site Furniture","status":"Expiring","rating":"Starter-Achiever","ctx":[[-1,-1,-1,-1]]},{"supplier":"Sundrella","category":"Paints, Stains + Coating","status":"Expiring","rating":"Starter","ctx":[[-1,-1,-1,-1]]},{"supplier":"Symglass","category":"Drinkware","status":"Expiring","rating":"In Process","ctx":[[-1,-1,-1,-1]]},{"supplier":"TCP Lighting","category":"Lighting, Bulbs + Shades","status":"Active","rating":"Leader","aka":["Technical Consumer Products"],"space":[1],"tier":[2,4],"ptype":[1],"sector":[0],"ctx":[[1,2,1,0],[1,4,1,0]]},{"supplier":"The Delos Company","category":"Area Rug","status":"Expiring","rating":"Achiever","aka":["Delos"],"ctx":[[-1,-1,-1,-1]]},{"supplier":"TLC Hospitality (The Living Company)","category":"Seating + Upholstered Furniture","status":"Active","rating":"Achiever-Leader","aka":["TLC Hospitality"],"space":[1,3],"tier":[1],"ptype":[4],"sector":[0],"ctx":[[-1,1,4,0],[1,1,4,0],[3,1,4,0]]},{"supplier":"TPV Technology","category":"Multimedia Equipment","status":"New","rating":"In Process","ctx":[[-1,-1,-1,-1]]},{"supplier":"Tred-MOR Sponge Cushion (Leggett & Platt)","category":"Carpet + Area Rugs","status":"Expiring","rating":"Leader","aka":["Tred-MOR Sponge Cushion"],"space":[0,1,3,4],"tier":[0,1,2,3,4],"ptype":[0,1,4],"sector":[0],"ctx":[[-1,0,4,0],[-1,1,0,0],[-1,1,4,0],[0,0,4,0],[0,1,4,0],[1,0,1,0],[1,0,4,0],[1,1,1,0],[1,1,4,0],[1,2,1,0],[1,2,4,0],[1,3,4,0],[1,4,1,0],[3,0,4,0],[3,1,4,0],[3,2,1,0],[3,2,4,0],[3,4,1,0],[4,0,4,0]]},{"supplier":"Trinity Lighting","category":"Lighting, Bulbs + Shades","status":"Expiring","rating":"Achiever-Leader","space":[1,3,4],"tier":[0,1,2,3,4],"ptype":[0,1,4],"sector":[0],"ctx":[[-1,0,4,0],[-1,1,0,0],[-1,1,4,0],[-1,3,4,0],[1,0,4,0],[1,1,0,0],[1,1,1,0],[1,1,4,0],[1,2,1,0],[1,2,4,0],[1,3,1,0],[1,3,4,0],[1,4,1,0],[3,1,0,0],[3,3,1,0],[3,3,4,0],[4,0,4,0]]},{"supplier":"Ulster Carpets","category":"Carpet + Area Rugs","status":"Active","rating":"Leader","space":[1],"tier":[0],"ptype":[1,4],"sector":[0],"ctx":[[-1,0,4,0],[1,0,1,0],[1,0,4,0]]},{"supplier":"US Vinyl Manufacturing Corporation","category":"Wallcoverings","status":"Expiring","rating":"Leader","space":[1,3],"tier":[1,3],"ptype":[0,4],"sector":[0],"ctx":[[-1,3,4,0],[1,1,0,0],[1,3,4,0],[3,3,4,0]]},{"supplier":"Valley Forge Fabrics","category":"Fabrics + Leather","status":"Expiring","rating":"Starter-Leader","space":[0,1,3,4],"tier":[0,1,2,3,4],"ptype":[0,1,4],"sector":[0],"ctx":[[-1,0,4,0],[-1,1,4,0],[-1,2,4,0],[0,1,4,0],[1,0,1,0],[1,0,4,0],[1,1,0,0],[1,1,1,0],[1,1,4,0],[1,2,1,0],[1,2,4,0],[1,3,1,0],[1,3,4,0],[1,4,1,0],[3,0,1,0],[3,1,0,0],[3,1,4,0],[3,2,1,0],[3,2,4,0],[3,3,1,0],[3,3,4,0],[3,4,1,0],[4,1,4,0]]},{"supplier":"Valley Forge Fabrics","category":"Textile Accessories + Bedding Accessories","status":"Expiring","rating":"Leader","space":[0,1,3,4],"tier":[0,1,2,3,4],"ptype":[0,1,4],"sector":[0],"ctx":[[-1,0,4,0],[-1,1,4,0],[-1,2,4,0],[0,1,4,0],[1,0,1,0],[1,0,4,0],[1,1,0,0],[1,1,1,0],[1,1,4,0],[1,2,1,0],[1,2,4,0],[1,3,1,0],[1,3,4,0],[1,4,1,0],[3,0,1,0],[3,1,0,0],[3,1,4,0],[3,2,1,0],[3,2,4,0],[3,3,1,0],[3,3,4,0],[3,4,1,0],[4,1,4,0]]},{"supplier":"Wendover Art Group","category":"Art, Murals, Paintings + Sculpture","status":"Expiring","rating":"Leader","ctx":[[-1,-1,-1,-1]]},{"supplier":"West Elm","category":"Art, Murals, Paintings + Sculpture","status":"Expiring","rating":"Achiever","space":[0,1,2,3,4],"tier":[0,1,2,3,4],"ptype":[0,1,2,3,4],"sector":[0,1,2],"ctx":[[-1,-1,4,1],[-1,1,4,0],[0,1,4,0],[1,0,4,0],[1,1,0,0],[1,1,1,0],[1,1,2,0],[1,1,4,0],[1,2,1,0],[1,2,4,0],[1,3,4,0],[1,4,1,0],[2,-1,3,2],[3,0,4,0],[3,1,0,0],[3,1,4,0],[3,2,1,0],[3,2,4,0],[3,3,1,0],[3,3,4,0],[3,4,1,0],[4,1,4,0]]},{"supplier":"West Elm","category":"Casegoods","status":"Expiring","rating":"Achiever-Leader","space":[0,1,2,3,4],"tier":[0,1,2,3,4],"ptype":[0,1,2,3,4],"sector":[0,1,2],"ctx":[[-1,-1,4,1],[-1,1,4,0],[0,1,4,0],[1,0,4,0],[1,1,0,0],[1,1,1,0],[1,1,2,0],[1,1,4,0],[1,2,1,0],[1,2,4,0],[1,3,4,0],[1,4,1,0],[2,-1,3,2],[3,0,4,0],[3,1,0,0],[3,1,4,0],[3,2,1,0],[3,2,4,0],[3,3,1,0],[3,3,4,0],[3,4,1,0],[4,1,4,0]]},{"supplier":"West Elm","category":"Glass, Films + Mirrors","status":"Expiring","rating":"Achiever","space":[0,1,2,3,4],"tier":[0,1,2,3,4],"ptype":[0,1,2,3,4],"sector":[0,1,2],"ctx":[[-1,-1,4,1],[-1,1,4,0],[0,1,4,0],[1,0,4,0],[1,1,0,0],[1,1,1,0],[1,1,2,0],[1,1,4,0],[1,2,1,0],[1,2,4,0],[1,3,4,0],[1,4,1,0],[2,-1,3,2],[3,0,4,0],[3,1,0,0],[3,1,4,0],[3,2,1,0],[3,2,4,0],[3,3,1,0],[3,3,4,0],[3,4,1,0],[4,1,4,0]]},{"supplier":"West Elm","category":"Lighting, Bulbs + Shades","status":"Expiring","rating":"Achiever","space":[0,1,2,3,4],"tier":[0,1,2,3,4],"ptype":[0,1,2,3,4],"sector":[0,1,2],"ctx":[[-1,-1,4,1],[-1,1,4,0],[0,1,4,0],[1,0,4,0],[1,1,0,0],[1,1,1,0],[1,1,2,0],[1,1,4,0],[1,2,1,0],[1,2,4,0],[1,3,4,0],[1,4,1,0],[2,-1,3,2],[3,0,4,0],[3,1,0,0],[3,1,4,0],[3,2,1,0],[3,2,4,0],[3,3,1,0],[3,3,4,0],[3,4,1,0],[4,1,4,0]]},{"supplier":"West Elm","category":"Seating + Upholstered Furniture","status":"Expiring","rating":"Achiever","space":[0,1,2,3,4],"tier":[0,1,2,3,4],"ptype":[0,1,2,3,4],"sector":[0,1,2],"ctx":[[-1,-1,4,1],[-1,1,4,0],[0,1,4,0],[1,0,4,0],[1,1,0,0],[1,1,1,0],[1,1,2,0],[1,1,4,0],[1,2,1,0],[1,2,4,0],[1,3,4,0],[1,4,1,0],[2,-1,3,2],[3,0,4,0],[3,1,0,0],[3,1,4,0],[3,2,1,0],[3,2,4,0],[3,3,1,0],[3,3,4,0],[3,4,1,0],[4,1,4,0]]},{"supplier":"West Elm","category":"Textile Accessories + Bedding Accessories","status":"Expiring","rating":"Achiever","space":[0,1,2,3,4],"tier":[0,1,2,3,4],"ptype":[0,1,2,3,4],"sector":[0,1,2],"ctx":[[-1,-1,4,1],[-1,1,4,0],[0,1,4,0],[1,0,4,0],[1,1,0,0],[1,1,1,0],[1,1,2,0],[1,1,4,0],[1,2,1,0],[1,2,4,0],[1,3,4,0],[1,4,1,0],[2,-1,3,2],[3,0,4,0],[3,1,0,0],[3,1,4,0],[3,2,1,0],[3,2,4,0],[3,3,1,0],[3,3,4,0],[3,4,1,0],[4,1,4,0]]},{"supplier":"Wolf-Gordon","category":"Wallcoverings","status":"Active","rating":"Achiever","space":[0,1,2,3],"tier":[0,1,2,3,4],"ptype":[0,1,3,4],"sector":[0,1,2],"ctx":[[-1,0,4,0],[-1,1,4,0],[-1,2,1,0],[0,0,4,0],[0,1,4,0],[1,0,4,0],[1,1,0,0],[1,1,1,0],[1,1,4,0],[1,2,1,0],[1,2,4,0],[1,3,4,0],[2,-1,3,2],[3,0,1,0],[3,0,1,1],[3,0,4,0],[3,1,0,0],[3,1,4,0],[3,2,1,0],[3,2,4,0],[3,3,4,0],[3,4,1,0]]}]}/*@END*/;
 
 /* ===================== APP ===================== */
 (function(){
@@ -405,9 +421,13 @@ function parseRating(raw){
   const lo = Math.min(...parts), hi = Math.max(...parts);
   return {lo, hi, label: lo===hi ? TIERS[lo] : TIERS[lo]+"–"+TIERS[hi], key: hi*10+lo};
 }
-const rows = ROWS.map((r,i) => ({...r, id:i, supplier:String(r.supplier||"").trim(), category:String(r.category||"").trim(), status:String(r.status||"").trim(), r:parseRating(r.rating)}));
+const FACETS = DATA.facets || {};
+const FACET_LABELS = {space:"Space", tier:"Hotel tier", ptype:"Project type", sector:"Sector"};
+const rows = (DATA.rows||[]).map((r,i) => ({...r, id:i, aka:r.aka||[], supplier:String(r.supplier||"").trim(), category:String(r.category||"").trim(), status:String(r.status||"").trim(), r:parseRating(r.rating)}));
 
-const state = {q:"", cat:"", sort:"name", view:"supplier", tiers:new Set(), statuses:new Set(), onlyShort:false};
+const state = {q:"", cat:"", sort:"name", view:"supplier", tiers:new Set(), statuses:new Set(), onlyShort:false, facets:{}};
+Object.keys(FACETS).forEach(k => state.facets[k] = new Set());
+const facetCount = () => Object.values(state.facets).reduce((n,s) => n + s.size, 0);
 let shortlist = new Set();
 try { shortlist = new Set(JSON.parse(localStorage.getItem("mc-rsl-shortlist")||"[]")); } catch(e){}
 const saveShort = () => { try { localStorage.setItem("mc-rsl-shortlist", JSON.stringify([...shortlist])); } catch(e){} };
@@ -447,9 +467,14 @@ function rowMatches(r){
     else if (!r.r.unknown) for (let i=r.r.lo; i<=r.r.hi; i++) if (state.tiers.has(TIERS[i])) ok = true;
     if (!ok) return false;
   }
+  if (facetCount()){
+    const keys = DATA.ctxKeys || [];
+    const ok = (r.ctx||[]).some(c => keys.every((k,j) => !state.facets[k] || !state.facets[k].size || state.facets[k].has(c[j])));
+    if (!ok) return false;
+  }
   if (state.q){
     const q = state.q.toLowerCase();
-    if (!r.supplier.toLowerCase().includes(q) && !r.category.toLowerCase().includes(q)) return false;
+    if (!r.supplier.toLowerCase().includes(q) && !r.category.toLowerCase().includes(q) && !r.aka.some(a => a.toLowerCase().includes(q))) return false;
   }
   return true;
 }
@@ -459,7 +484,8 @@ const hl = s => {
   if (i < 0) return esc(s);
   return esc(s.slice(0,i)) + "<mark>" + esc(s.slice(i, i+state.q.length)) + "</mark>" + esc(s.slice(i+state.q.length));
 };
-const pill = s => s ? `<span class="pill ${STATUSES.includes(s)?esc(s):"other"}">${esc(s)}</span>` : "";
+const STATUS_TIP = {Active:"Rating is current", Expiring:"Rating is due for renewal. Confirm with MindClick before specifying", New:"Recently joined the network"};
+const pill = s => s ? `<span class="pill ${STATUSES.includes(s)?esc(s):"other"}"${STATUS_TIP[s]?` title="${STATUS_TIP[s]}"`:""}>${esc(s)}</span>` : "";
 function spanHTML(r){
   if (r.proc) return `<span class="rate proc"><span class="span proc" aria-hidden="true"><i></i><i></i><i></i></span><span class="lbl">In process</span></span>`;
   if (r.unknown) return `<span class="rate"><span class="lbl">${esc(r.label)}</span></span>`;
@@ -473,8 +499,12 @@ const bestKey = list => Math.max(...list.map(r => r.r.key));
 function render(){
   const hits = rows.filter(rowMatches);
   const list = $("#list");
-  const anyFilter = state.q || state.cat || state.tiers.size || state.statuses.size || state.onlyShort;
+  const anyFilter = state.q || state.cat || state.tiers.size || state.statuses.size || state.onlyShort || facetCount();
+  
   $("#reset").hidden = !anyFilter;
+  const nf = state.tiers.size + state.statuses.size + facetCount();
+  $("#filtCount").textContent = nf || "";
+  $("#filtBtn").classList.toggle("on", nf > 0);
 
   const bySup = new Map();
   hits.forEach(r => { if (!bySup.has(r.supplier)) bySup.set(r.supplier, []); bySup.get(r.supplier).push(r); });
@@ -496,7 +526,8 @@ function render(){
         const sts = [...new Set(rs.map(r => r.status))];
         const one = sts.length === 1;
         rs.sort((a,b) => state.sort==="rating" ? (b.r.key-a.r.key) || a.category.localeCompare(b.category) : a.category.localeCompare(b.category));
-        return `<article class="entry"><div class="who"><h3>${hl(name)}</h3><div class="meta">${one?pill(sts[0]):""}${starBtn(name)}</div></div>
+        const akaHit = state.q && !name.toLowerCase().includes(state.q.toLowerCase()) && rs[0].aka.find(a => a.toLowerCase().includes(state.q.toLowerCase()));
+        return `<article class="entry"><div class="who"><h3>${hl(name)}</h3>${akaHit?`<span class="aka">Also listed as ${hl(akaHit)}</span>`:""}<div class="meta">${one?pill(sts[0]):""}${starBtn(name)}</div></div>
           <ul class="lines">${rs.map(r => `<li><span class="cat">${hl(r.category)}${one?"":pill(r.status)}</span>${spanHTML(r.r)}</li>`).join("")}</ul></article>`;
       }).join("");
   } else {
@@ -542,6 +573,8 @@ $("#tierChips").addEventListener("click", e => { const b = e.target.closest("[da
 $("#statusChips").addEventListener("click", e => { const b = e.target.closest("[data-status]"); if (b) toggleChip(b, state.statuses, b.dataset.status); });
 function clearAll(){
   state.q=""; state.cat=""; state.tiers.clear(); state.statuses.clear(); state.onlyShort=false;
+  Object.values(state.facets).forEach(s => s.clear());
+  document.querySelectorAll('#facetRow select').forEach(s => { s.value = ''; s.classList.remove('on'); });
   $("#q").value=""; catSel.value="";
   document.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed","false"));
   render(); renderShort();
@@ -563,6 +596,14 @@ $("#shortMail").addEventListener("click", () => {
   const body = "Hello MindClick,\n\nPlease confirm which products from these suppliers are currently rated:\n\n" + shortText() + "\n\nThank you,";
   location.href = `mailto:${CONFIG.shortlistEmail}?subject=${encodeURIComponent("Product rating request")}&body=${encodeURIComponent(body)}`;
 });
+$("#filtBtn").addEventListener("click", () => {
+  const open = $("#filtBtn").getAttribute("aria-expanded") !== "true";
+  $("#filtBtn").setAttribute("aria-expanded", open); $("#filterPanel").hidden = !open;
+});
+$("#guideBtn").addEventListener("click", () => {
+  const open = $("#guideBtn").getAttribute("aria-expanded") !== "true";
+  $("#guideBtn").setAttribute("aria-expanded", open); $("#guide").hidden = !open;
+});
 $("#pdfBtn").addEventListener("click", () => window.print());
 $("#csvBtn").addEventListener("click", () => {
   const hits = rows.filter(rowMatches);
@@ -572,6 +613,22 @@ $("#csvBtn").addEventListener("click", () => {
   a.href = URL.createObjectURL(new Blob(["\ufeff"+csv], {type:"text/csv;charset=utf-8"}));
   a.download = "MindClick_Rated_Supplier_List.csv";
   document.body.appendChild(a); a.click(); a.remove();
+});
+
+/* More filters: dropdowns */
+const PLURAL = {space:"All spaces", tier:"All hotel tiers", ptype:"All project types", sector:"All sectors"};
+const facetKeys = Object.keys(FACETS).filter(k => (FACETS[k]||[]).length);
+$("#facetRow").innerHTML = facetKeys.map(k => {
+  const n = i => new Set(rows.filter(r => (r[k]||[]).includes(i)).map(r => r.supplier)).size;
+  return `<label class="fsel"><span>${FACET_LABELS[k]||k}</span><select data-facet="${k}" aria-label="${FACET_LABELS[k]||k}"><option value="">${PLURAL[k]||"All"}</option>${FACETS[k].map((v,i) => `<option value="${i}">${esc(v)} (${n(i)})</option>`).join("")}</select></label>`;
+}).join("");
+if (!facetKeys.length) $("#facetRow").hidden = true;
+$("#facetRow").addEventListener("change", e => {
+  const s = e.target.closest("select[data-facet]"); if (!s) return;
+  const set = state.facets[s.dataset.facet]; set.clear();
+  if (s.value !== "") set.add(+s.value);
+  s.classList.toggle("on", s.value !== "");
+  render();
 });
 
 render(); renderShort();
