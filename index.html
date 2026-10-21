@@ -326,6 +326,14 @@ dialog.drawer[open]{display:flex;flex-direction:column}
 .flist .fs{color:var(--muted);font-size:12px}
 .flist .frm{border:0;background:none;color:var(--muted);font-size:18px;line-height:1;cursor:pointer;padding:0 4px}
 .flist .frm:hover{color:#c2412d}
+/* Sending state */
+.spin{display:inline-block;width:14px;height:14px;margin-right:8px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;vertical-align:-2px;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation-duration:2.4s}}
+.fstatus{margin:10px 0 0;font-size:12.5px;color:var(--muted);text-align:right}
+.drop.locked{pointer-events:none;opacity:.6}
+.btn:disabled{cursor:default}
+.btn.primary:disabled{opacity:1}
 /* Request form dialog */
 dialog{border:0;padding:0;border-radius:18px;background:var(--card);color:var(--ink);width:min(560px,calc(100% - 24px));max-height:calc(100% - 32px);box-shadow:0 20px 60px rgba(0,30,24,.35)}
 dialog::backdrop{background:rgba(10,25,21,.45)}
@@ -567,7 +575,7 @@ const CONFIG = {
   // request is added as a row in your Google Sheet. If it's empty, the form opens a pre-filled email
   // to requestEmail instead.
   sheetEndpoint: "https://script.google.com/macros/s/AKfycbxKNMSZWA47yOKscp4xPsdieOJmLvnS_WC0flSNpbvtmeemJKhd_1nB_-eIjUsszGuZzw/exec",
-  requestEmail: "mmaciejewski@mindclick.com"
+  requestEmail: "apine@mindclick.com"
 };
 
 /* ===================== ICONS ===================== */
@@ -898,8 +906,8 @@ function openForm(kind, prefill={}){
   };
   $("#dlgBody").innerHTML = `<h2 id="dlgTitle">${F.title}</h2><p class="intro">${F.intro}</p>
     <form id="reqForm" novalidate><div class="hp" aria-hidden="true"><label>Leave this empty <input name="hp_field" tabindex="-1" autocomplete="off"></label></div><div class="fgrid">${F.fields.map(field).join("")}</div>
-    <div class="actions"><span class="msg" id="formMsg" role="alert"></span><button type="button" class="btn" id="formCancel">Cancel</button><button type="submit" class="btn primary">Send request</button></div></form>`;
-  $("#formCancel").onclick = () => dlg.close();
+    <div class="actions"><span class="msg" id="formMsg" role="alert"></span><button type="button" class="btn" id="formCancel">Cancel</button><button type="submit" class="btn primary">Send request</button></div><p class="fstatus" id="formStatus" role="status" hidden></p></form>`;
+  $("#formCancel").onclick = () => { if (!busy) dlg.close(); };
   setupDrop($("#reqForm"));
   $("#reqForm").onsubmit = e => { e.preventDefault(); submitForm(kind, e.target); };
   dlg.showModal();
@@ -926,10 +934,12 @@ async function submitForm(kind, form){
   };
   if (CONFIG.sheetEndpoint){
     const btn = form.querySelector('button[type="submit"]');
-    btn.disabled = true; btn.textContent = picked.length ? "Uploading…" : "Sending…"; $("#formMsg").textContent = "";
+    const totalMB = picked.reduce((s,f) => s + f.size, 0);
+    setBusy(true, btn, picked.length ? "Uploading…" : "Sending…",
+      picked.length ? `Uploading ${picked.length} file${picked.length===1?"":"s"} (${fmtSize(totalMB)}). This can take up to 20 seconds, so please keep this window open.` : "");
     if (picked.length){
       try { data.files = await Promise.all(picked.map(async f => ({name: f.name, type: f.type, size: f.size, data: await readB64(f)}))); }
-      catch(e){ btn.disabled = false; btn.textContent = "Send request"; $("#formMsg").textContent = "One of the files couldn’t be read. Remove it and try again."; return; }
+      catch(e){ setBusy(false); btn.textContent = "Send request"; $("#formMsg").textContent = "One of the files couldn’t be read. Remove it and try again."; return; }
     }
     const payload = JSON.stringify(data);
     let sent = false;
@@ -943,20 +953,33 @@ async function submitForm(kind, form){
       // (beacons are capped at ~64 KB, so this backup only helps requests without files)
       if (!picked.length) { try { sent = !!(navigator.sendBeacon && navigator.sendBeacon(CONFIG.sheetEndpoint, new Blob([payload], {type:"text/plain;charset=utf-8"}))); } catch(e2){ sent = false; } }
     }
+    setBusy(false);
     if (sent){
       const filesNote = picked.length ? ` Your ${picked.length === 1 ? "file was" : picked.length + " files were"} uploaded with it.` : "";
       done((kind==="supplier" ? "We’ve received your supplier request and will follow up by email." : "We’ve received your request. Expect product ratings within 1–2 business days.") + filesNote);
       return;
     }
-    btn.disabled = false; btn.textContent = "Try again";
+    btn.textContent = "Try again";
     $("#formMsg").innerHTML = `We couldn’t send that from this browser. <a href="${esc(mailHref())}">Email us instead</a>${picked.length ? " and attach your files there" : ""}.`;
     return;
   }
   location.href = mailHref();
   done("Your email app should open with the request filled in." + (picked.length ? " Attach your files to the email, then press send." : " Press send there to submit it."));
 }
-$("#dlgClose").onclick = () => dlg.close();
-dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
+let busy = false;
+const leaveWarn = e => { e.preventDefault(); e.returnValue = ""; };
+function setBusy(on, btn, label, note){
+  busy = on;
+  const form = $("#reqForm");
+  if (form) form.querySelectorAll("input,textarea,select,button,#drop").forEach(el => { if (el.id !== "drop") el.disabled = on; el.classList && el.classList.toggle("locked", on); });
+  if (on && btn){ btn.innerHTML = `<span class="spin" aria-hidden="true"></span>${label}`; }
+  $("#dlgClose").disabled = on;
+  const st = $("#formStatus"); if (st){ st.textContent = on ? (note || "") : ""; st.hidden = !(on && note); }
+  if (on) window.addEventListener("beforeunload", leaveWarn); else window.removeEventListener("beforeunload", leaveWarn);
+}
+$("#dlgClose").onclick = () => { if (!busy) dlg.close(); };
+dlg.addEventListener("click", e => { if (e.target === dlg && !busy) dlg.close(); });
+dlg.addEventListener("cancel", e => { if (busy) e.preventDefault(); });   // Esc key
 document.addEventListener("click", e => {
   const b = e.target.closest("[data-form]"); if (!b) return;
   const pre = {};
