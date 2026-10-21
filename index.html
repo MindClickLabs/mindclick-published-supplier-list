@@ -298,6 +298,34 @@ dialog.drawer[open]{display:flex;flex-direction:column}
 .ctable td.st{width:30px;padding-left:0}
 .star.mini{padding:2px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.dcat p.kcnote{margin:-4px 0 10px;font-size:12.5px;color:var(--muted);font-style:italic}
+.fkey .kcnote{flex-basis:100%;order:99;font-style:italic;font-size:11.5px;color:var(--muted);margin-top:-2px}
+/* (i) tooltip */
+.kch{display:flex;align-items:center;gap:6px}
+.tip{position:relative;display:inline-flex}
+.tipbtn{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--muted);background:none;color:var(--muted);font:italic 700 10.5px/1 Georgia,"Times New Roman",serif;display:grid;place-items:center;cursor:help;padding:0}
+.tipbtn:hover,.tipbtn:focus-visible{border-color:var(--accent);color:var(--accent)}
+.tiptext{position:absolute;left:-10px;top:calc(100% + 8px);width:max-content;max-width:240px;background:var(--green);color:#fff;font-size:12px;font-weight:500;font-style:normal;line-height:1.4;padding:7px 10px;border-radius:8px;box-shadow:0 6px 18px rgba(0,30,24,.22);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s;z-index:30;white-space:normal}
+.tiptext::after{content:"";position:absolute;bottom:100%;left:13px;border:5px solid transparent;border-bottom-color:var(--green)}
+.tip:hover .tiptext,.tipbtn:focus + .tiptext{opacity:1;visibility:visible}
+.tip.down .tiptext{bottom:auto;top:calc(100% + 8px);left:-10px;transform:none}
+.tip.down .tiptext::after{top:auto;bottom:100%;left:14px;transform:none;border-top-color:transparent;border-bottom-color:var(--green)}
+.lhead .kch,.ctable th .kch{display:inline-flex;align-items:center;gap:6px}
+/* File drop area */
+.drop{display:flex;flex-direction:column;align-items:center;gap:4px;padding:16px;border:1.5px dashed var(--sage);border-radius:12px;background:var(--bg);text-align:center;cursor:pointer;color:var(--muted);font-size:13.5px;transition:background .15s,border-color .15s}
+.drop svg{width:22px;height:22px;color:var(--accent)}
+.drop b{color:var(--ink);font-weight:700}
+.drop .browse{color:var(--accent);font-weight:700;text-decoration:underline;text-underline-offset:2px}
+.drop small{font-size:11.5px}
+.drop:hover,.drop.over{border-color:var(--accent);background:var(--soft)}
+.drop:focus-visible{outline:2px solid var(--coral);outline-offset:2px}
+.flist{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px}
+.flist:empty{display:none}
+.flist li{display:flex;align-items:center;gap:10px;padding:6px 8px 6px 12px;background:var(--soft);border-radius:8px;font-size:13px}
+.flist .fn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.flist .fs{color:var(--muted);font-size:12px}
+.flist .frm{border:0;background:none;color:var(--muted);font-size:18px;line-height:1;cursor:pointer;padding:0 4px}
+.flist .frm:hover{color:#c2412d}
 /* Request form dialog */
 dialog{border:0;padding:0;border-radius:18px;background:var(--card);color:var(--ink);width:min(560px,calc(100% - 24px));max-height:calc(100% - 32px);box-shadow:0 20px 60px rgba(0,30,24,.35)}
 dialog::backdrop{background:rgba(10,25,21,.45)}
@@ -468,7 +496,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   <div class="listbar">
     <p class="count"><span id="count" aria-live="polite"></span><button class="reset" id="reset" type="button" hidden>Clear filters</button></p>
     <div class="tools">
-      <div class="seg dens" role="group" aria-label="Table layout"><button type="button" data-dens="expanded" aria-pressed="true" aria-label="Expanded view" title="Expanded view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="6.5" rx="1.8"/><rect x="3.5" y="13.5" width="17" height="6.5" rx="1.8"/></svg></button><button type="button" data-dens="compact" aria-pressed="false" aria-label="Compact view" title="Compact view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 5.5h16M4 10h16M4 14.5h16M4 19h16"/></svg></button></div>
+      <div class="seg dens" role="group" aria-label="Table layout"><button type="button" data-dens="expanded" aria-pressed="false" aria-label="Expanded view" title="Expanded view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="6.5" rx="1.8"/><rect x="3.5" y="13.5" width="17" height="6.5" rx="1.8"/></svg></button><button type="button" data-dens="compact" aria-pressed="true" aria-label="Compact view" title="Compact view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 5.5h16M4 10h16M4 14.5h16M4 19h16"/></svg></button></div>
       <button class="btn" id="guideBtn" type="button" aria-expanded="false" aria-controls="guide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.3M12 17h.01"/></svg>How to read this list</button>
       <button class="btn" id="pdfBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v7H6z"/></svg>Print or save PDF</button>
       <button class="btn primary" id="csvBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Download CSV</button>
@@ -570,8 +598,8 @@ const rows = (DATA.rows||[]).map((r,i) => ({...r, id:i, aka:r.aka||[], f:r.f||[]
 rows.forEach(r => r.nf = r.f.filter(x => x > 0).length);
 const TOTAL_SUP = new Set(rows.map(r => r.supplier)).size;
 
-const state = {q:"", cat:"", sort:"name", view:"supplier", tiers:new Set(), statuses:new Set(), feats:new Set(), onlyShort:false, facets:{}, density:"expanded"};
-try { if (localStorage.getItem("mc-psl-density") === "compact") state.density = "compact"; } catch(e){}
+const state = {q:"", cat:"", sort:"name", view:"supplier", tiers:new Set(), statuses:new Set(), feats:new Set(), onlyShort:false, facets:{}, density:"compact"};
+try { const d_ = localStorage.getItem("mc-psl-density"); if (d_ === "expanded" || d_ === "compact") state.density = d_; } catch(e){}
 Object.keys(FACETS).forEach(k => state.facets[k] = new Set());
 const facetCount = () => Object.values(state.facets).reduce((n,s) => n + s.size, 0);
 let shortlist = new Set();
@@ -603,7 +631,7 @@ if (FEATS.length){
   $("#featList").innerHTML = FEATS.map(f => `<li>${featImg(f.key,"")}<span><b>${esc(f.label)}</b>${esc(f.desc)}</span></li>`).join("");
 } else { $("#featGroup").hidden = true; document.querySelector(".featkey").hidden = true; }
 
-$("#fkey").innerHTML = FEATS.length ? `<span class="gl">Key contributions</span>` + FEATS.map(f => `<span class="k" title="${esc(f.desc)}"><img src="${ICONS[f.key]||""}" alt="">${esc(f.label)}</span>`).join("") : "";
+$("#fkey").innerHTML = FEATS.length ? `<span class="gl">Key contributions</span><span class="kcnote">The actual contribution will vary by specific product.</span>` + FEATS.map(f => `<span class="k" title="${esc(f.desc)}"><img src="${ICONS[f.key]||""}" alt="">${esc(f.label)}</span>`).join("") : "";
 if (!FEATS.length) $("#fkey").hidden = true;
 const facetKeys = Object.keys(FACETS).filter(k => (FACETS[k]||[]).length);
 $("#facetRow").innerHTML = facetKeys.map(k => `<label class="fsel"><span>${FACET_LABELS[k]||k}</span><select data-facet="${k}" aria-label="${FACET_LABELS[k]||k}"><option value="">${FACET_ALL[k]||"All"}</option>${FACETS[k].map((v,i) => `<option value="${i}">${esc(v)}</option>`).join("")}</select></label>`).join("");
@@ -696,7 +724,7 @@ function render(){
     const starMini = name => { const on = shortlist.has(name); return `<button type="button" class="star mini" data-sup="${esc(name)}" aria-pressed="${on}" aria-label="${on?"Remove from shortlist":"Add to shortlist"}: ${esc(name)}" title="${on?"Shortlisted":"Shortlist"}">${starSVG}</button>`; };
     const nameCell = r => `<button type="button" class="nameBtn" data-open="${esc(r.supplier)}" data-cat="${esc(r.category)}">${hl(r.supplier)}</button>`;
     const head = bySup_ ? ["Supplier","Status","Category"] : ["Category","Supplier","Status"];
-    list.innerHTML = `<div class="tscroll"><table class="ctable"><thead><tr>${head.map(h => `<th>${h}</th>`).join("")}<th>Key contributions</th><th>Product rating range</th><th><span class="sr">Shortlist</span></th></tr></thead><tbody>` +
+    list.innerHTML = `<div class="tscroll"><table class="ctable"><thead><tr>${head.map(h => `<th>${h}</th>`).join("")}<th><span class="kch">Key contributions<span class="tip down"><button type="button" class="tipbtn" aria-label="About key contributions" aria-describedby="kctip-${state.density}">i</button><span class="tiptext" role="tooltip" id="kctip-${state.density}">The actual contribution will vary by specific product.</span></span></span></th><th>Product rating range</th><th><span class="sr">Shortlist</span></th></tr></thead><tbody>` +
       gl.map(([g, rs]) => {
         rs.sort((a,b) => lineSort(a,b,r => bySup_ ? r.category : r.supplier));
         return rs.map((r,i) => `<tr class="clk${i===0?" g1":""}" data-open="${esc(r.supplier)}" data-cat="${esc(r.category)}">` +
@@ -708,7 +736,7 @@ function render(){
   }
   if (state.view === "supplier"){
     const sups = [...bySup.entries()].sort((a,b) => (sortKey(b[1]) - sortKey(a[1])) || cmp(a[0], b[0]));
-    list.innerHTML = `<div class="lhead"><span>Supplier</span><span class="sub"><span>Category</span><span>Key contributions</span><span>Product rating range</span></span></div>` +
+    list.innerHTML = `<div class="lhead"><span>Supplier</span><span class="sub"><span>Category</span><span class="kch">Key contributions<span class="tip down"><button type="button" class="tipbtn" aria-label="About key contributions" aria-describedby="kctip-${state.density}">i</button><span class="tiptext" role="tooltip" id="kctip-${state.density}">The actual contribution will vary by specific product.</span></span></span><span>Product rating range</span></span></div>` +
       sups.map(([name, rs]) => {
         const sts = [...new Set(rs.map(r => r.status))], one = sts.length === 1;
         rs.sort((a,b) => lineSort(a,b,r => r.category));
@@ -718,7 +746,7 @@ function render(){
   } else {
     const byCat = new Map();
     hits.forEach(r => { if (!byCat.has(r.category)) byCat.set(r.category, []); byCat.get(r.category).push(r); });
-    list.innerHTML = `<div class="lhead"><span>Category</span><span class="sub"><span>Supplier</span><span>Key contributions</span><span>Product rating range</span></span></div>` +
+    list.innerHTML = `<div class="lhead"><span>Category</span><span class="sub"><span>Supplier</span><span class="kch">Key contributions<span class="tip down"><button type="button" class="tipbtn" aria-label="About key contributions" aria-describedby="kctip-${state.density}">i</button><span class="tiptext" role="tooltip" id="kctip-${state.density}">The actual contribution will vary by specific product.</span></span></span><span>Product rating range</span></span></div>` +
       [...byCat.entries()].sort((a,b) => cmp(a[0], b[0])).map(([c, rs]) => {
         rs.sort((a,b) => lineSort(a,b,r => r.supplier));
         return `<article class="entry"><div class="who"><h3>${hl(c)}</h3><div class="meta"><span class="pill other">${rs.length} supplier${rs.length===1?"":"s"}</span></div></div>
@@ -744,7 +772,7 @@ function openDrawer(name, focusCat){
   const sts = [...new Set(rs.map(r => r.status))];
   const on = shortlist.has(name);
   const ov = OVERVIEW[name] || [];
-  const cats_ = rs.map(r => {
+  const cats_ = rs.map((r, ci) => {
     const lit = FEATS.map((f,i) => r.f[i] > 0 ? f : null).filter(Boolean);
     let body;
     if (!r.has) body = `<p class="dempty">${r.r.proc ? "Products are being assessed. Ratings and features will appear once the assessment is complete." : "Product details are available on request."}</p>`;
@@ -754,7 +782,7 @@ function openDrawer(name, focusCat){
       const keyIdx = Object.fromEntries(FEATS.map((f,i) => [f.key, i]));
       const under = k => items.filter(x => x[2] === k);
       const also = items.filter(x => !x[2] || !(r.f[keyIdx[x[2]]] > 0));
-      body = (lit.length ? `<h4>Key contributions</h4><ul class="fstory">${lit.map(f => { const its = under(f.key); return `<li><img src="${ICONS[f.key]||""}" alt="" title="${esc(f.desc)}"><p><b>${esc(f.label)}</b>${its.length ? its.map(([x,tg]) => esc(x) + (tg==="d" ? ` <span class="disc" title="Self-declared by the manufacturer">Disclosed</span>` : "")).join("; ") : esc(f.desc)}</p></li>`; }).join("")}</ul>` : `<p class="dempty">No tracked features reported yet.</p>`)
+      body = (lit.length ? `<h4>Key contributions</h4><p class="kcnote">The actual contribution will vary by specific product.</p><ul class="fstory">${lit.map(f => { const its = under(f.key); return `<li><img src="${ICONS[f.key]||""}" alt="" title="${esc(f.desc)}"><p><b>${esc(f.label)}</b>${its.length ? its.map(([x,tg]) => esc(x) + (tg==="d" ? ` <span class="disc" title="Self-declared by the manufacturer">Disclosed</span>` : "")).join("; ") : esc(f.desc)}</p></li>`; }).join("")}</ul>` : `<p class="dempty">No tracked features reported yet.</p>`)
         + (also.length ? `<h4>${lit.length ? "Also" : "Highlights"}</h4><ul class="hl also">${also.map(li).join("")}</ul>` : "");
     }
     return `<section class="dcat${r.category===focusCat?" focus":""}" data-cat="${esc(r.category)}"><div class="top"><h3>${esc(r.category)}</h3>${spanHTML(r.r)}</div>${sts.length>1?pill(r.status):""}${body}</section>`;
@@ -795,6 +823,7 @@ const FORMS = {
       ["category","Product category","catselect",false],
       ["contact","Supplier contact, if you have one","text",false],
       ["products","Products you’re considering from them","textarea",false,true],
+      ["files","Spec sheets or product documents","files",false,true],
       ["name","Your name","text",true],
       ["email","Your email","email",true],
       ["company","Company","text",true],
@@ -808,6 +837,7 @@ const FORMS = {
     fields: [
       ["suppliers","Suppliers","textarea",true,true],
       ["products","Products you’re considering","textarea",true,true],
+      ["files","Spec sheets or product documents","files",false,true],
       ["name","Your name","text",true],
       ["email","Your email","email",true],
       ["company","Company","text",true],
@@ -816,13 +846,52 @@ const FORMS = {
   }
 };
 const dlg = $("#dlg");
+const UPLOAD = {maxFiles: 5, maxMB: 20, exts: ["pdf","doc","docx","xls","xlsx","csv","ppt","pptx","png","jpg","jpeg","gif","webp","heic","zip","txt"]};
+UPLOAD.accept = UPLOAD.exts.map(x => "." + x).join(",");
+const fmtSize = n => n >= 1048576 ? (n/1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n/1024)) + " KB";
+function setupDrop(form){
+  const zone = form.querySelector("#drop"); if (!zone) return;
+  const input = form.querySelector("#f-files"), list = form.querySelector("#flist");
+  form._files = [];
+  const draw = () => {
+    list.innerHTML = form._files.map((f,i) => `<li><span class="fn">${esc(f.name)}</span><span class="fs">${fmtSize(f.size)}</span><button type="button" class="frm" data-rm="${i}" aria-label="Remove ${esc(f.name)}">×</button></li>`).join("");
+  };
+  const add = files => {
+    const msgs = [];
+    for (const f of files){
+      const ext = (f.name.split(".").pop() || "").toLowerCase();
+      if (!UPLOAD.exts.includes(ext)) { msgs.push(`${f.name} isn’t a supported file type`); continue; }
+      if (form._files.length >= UPLOAD.maxFiles) { msgs.push(`Up to ${UPLOAD.maxFiles} files`); break; }
+      const total = form._files.reduce((s,x) => s + x.size, 0) + f.size;
+      if (total > UPLOAD.maxMB * 1048576) { msgs.push(`${f.name} would go over ${UPLOAD.maxMB} MB total`); continue; }
+      if (!form._files.some(x => x.name === f.name && x.size === f.size)) form._files.push(f);
+    }
+    draw(); $("#formMsg").textContent = msgs.join(". ");
+  };
+  zone.addEventListener("click", () => input.click());
+  zone.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); input.click(); } });
+  input.addEventListener("change", () => { add([...input.files]); input.value = ""; });
+  ["dragenter","dragover"].forEach(ev => zone.addEventListener(ev, e => { e.preventDefault(); zone.classList.add("over"); }));
+  ["dragleave","dragend"].forEach(ev => zone.addEventListener(ev, () => zone.classList.remove("over")));
+  zone.addEventListener("drop", e => { e.preventDefault(); zone.classList.remove("over"); add([...(e.dataTransfer && e.dataTransfer.files || [])]); });
+  list.addEventListener("click", e => { const b = e.target.closest("[data-rm]"); if (b){ form._files.splice(+b.dataset.rm, 1); draw(); } });
+}
+const readB64 = f => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(",")[1] || ""); r.onerror = () => rej(r.error); r.readAsDataURL(f); });
+// keep files dropped outside the drop area from opening in the browser while a form is open
+["dragover","drop"].forEach(ev => document.addEventListener(ev, e => { if (document.getElementById("dlg").open && !e.target.closest("#drop")) e.preventDefault(); }));
 function openForm(kind, prefill={}){
   const F = FORMS[kind];
   const field = ([id,label,type,req,full]) => {
     const lab = `<label for="f-${id}">${esc(label)}${req?"":" <i>(optional)</i>"}</label>`;
     const v = esc(prefill[id]||"");
     let input;
-    if (type==="textarea") input = `<textarea id="f-${id}" name="${id}"${req?" required":""}>${v}</textarea>`;
+    if (type==="files") input = `<div class="drop" id="drop" tabindex="0" role="button" aria-describedby="dropHint">
+        <input type="file" id="f-${id}" multiple accept="${UPLOAD.accept}" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4m0 0-4 4m4-4 4 4M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+        <span><b>Drag files here</b> or <span class="browse">browse</span></span>
+        <small id="dropHint">PDF, Word, Excel, PowerPoint, images or ZIP. Up to ${UPLOAD.maxFiles} files, ${UPLOAD.maxMB} MB total.</small>
+      </div><ul class="flist" id="flist"></ul>`;
+    else if (type==="textarea") input = `<textarea id="f-${id}" name="${id}"${req?" required":""}>${v}</textarea>`;
     else if (type==="catselect") input = `<select id="f-${id}" name="${id}"><option value="">Choose a category</option>${cats.map(c => `<option>${esc(c)}</option>`).join("")}<option>Other</option></select>`;
     else input = `<input id="f-${id}" name="${id}" type="${type}" value="${v}"${req?" required":""}${type==="email"?' autocomplete="email"':id==="name"?' autocomplete="name"':id==="company"?' autocomplete="organization"':""}>`;
     return `<div class="field${full||type==="textarea"?" full":""}">${lab}${input}</div>`;
@@ -831,6 +900,7 @@ function openForm(kind, prefill={}){
     <form id="reqForm" novalidate><div class="hp" aria-hidden="true"><label>Leave this empty <input name="hp_field" tabindex="-1" autocomplete="off"></label></div><div class="fgrid">${F.fields.map(field).join("")}</div>
     <div class="actions"><span class="msg" id="formMsg" role="alert"></span><button type="button" class="btn" id="formCancel">Cancel</button><button type="submit" class="btn primary">Send request</button></div></form>`;
   $("#formCancel").onclick = () => dlg.close();
+  setupDrop($("#reqForm"));
   $("#reqForm").onsubmit = e => { e.preventDefault(); submitForm(kind, e.target); };
   dlg.showModal();
   const first = dlg.querySelector("input,textarea"); if (first && !first.value) first.focus();
@@ -843,29 +913,47 @@ async function submitForm(kind, form){
     el.setAttribute("aria-invalid", invalid); if (invalid && !bad) bad = el;
   });
   if (bad){ $("#formMsg").textContent = "Please fill in the highlighted fields."; bad.focus(); return; }
-  const data = {request: F.title}; new FormData(form).forEach((v,k) => data[k] = String(v).trim());
+  const data = {request: F.title}; new FormData(form).forEach((v,k) => { if (typeof v === "string") data[k] = v.trim(); });
+  const picked = form._files || [];
   if (data.hp_field) { dlg.close(); return; }   // spam trap: real visitors never see or fill this
   delete data.hp_field;
   data.page = location.href.split("#")[0];
   const done = msg => { $("#dlgBody").innerHTML = `<div class="done"><div class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></div><h2 id="dlgTitle">Thanks, ${esc(data.name||"")}</h2><p>${msg}</p><button type="button" class="btn primary" onclick="this.closest('dialog').close()">Done</button></div>`; };
+  const labels = Object.fromEntries(F.fields.map(f => [f[0], f[1]]));
+  const mailHref = () => {
+    const body = Object.entries(data).filter(([k,v]) => k!=="request" && k!=="page" && v).map(([k,v]) => `${labels[k]||k}:\n${v}`).join("\n\n");
+    return `mailto:${CONFIG.requestEmail}?subject=${encodeURIComponent(F.subject + (data.supplier ? ": " + data.supplier : data.company ? ": " + data.company : ""))}&body=${encodeURIComponent(body)}`;
+  };
   if (CONFIG.sheetEndpoint){
     const btn = form.querySelector('button[type="submit"]');
-    btn.disabled = true; btn.textContent = "Sending…"; $("#formMsg").textContent = "";
+    btn.disabled = true; btn.textContent = picked.length ? "Uploading…" : "Sending…"; $("#formMsg").textContent = "";
+    if (picked.length){
+      try { data.files = await Promise.all(picked.map(async f => ({name: f.name, type: f.type, size: f.size, data: await readB64(f)}))); }
+      catch(e){ btn.disabled = false; btn.textContent = "Send request"; $("#formMsg").textContent = "One of the files couldn’t be read. Remove it and try again."; return; }
+    }
+    const payload = JSON.stringify(data);
+    let sent = false;
     try {
       // Plain-text POST avoids a CORS preflight, which Apps Script doesn't answer; the response is opaque,
       // so a network error is the only failure we can see.
-      await fetch(CONFIG.sheetEndpoint, {method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain;charset=utf-8"}, body: JSON.stringify(data)});
-      done(kind==="supplier" ? "We’ve received your supplier request and will follow up by email." : "We’ve received your request. Expect product ratings within 1–2 business days.");
-      return;
+      await fetch(CONFIG.sheetEndpoint, {method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain;charset=utf-8"}, body: payload});
+      sent = true;
     } catch(err){
-      btn.disabled = false; btn.textContent = "Send request";
-      $("#formMsg").textContent = "We couldn’t send that. Opening an email instead.";
+      // Some browsers and blockers refuse fetch to Google from a local file or a strict page; try a beacon instead.
+      // (beacons are capped at ~64 KB, so this backup only helps requests without files)
+      if (!picked.length) { try { sent = !!(navigator.sendBeacon && navigator.sendBeacon(CONFIG.sheetEndpoint, new Blob([payload], {type:"text/plain;charset=utf-8"}))); } catch(e2){ sent = false; } }
     }
+    if (sent){
+      const filesNote = picked.length ? ` Your ${picked.length === 1 ? "file was" : picked.length + " files were"} uploaded with it.` : "";
+      done((kind==="supplier" ? "We’ve received your supplier request and will follow up by email." : "We’ve received your request. Expect product ratings within 1–2 business days.") + filesNote);
+      return;
+    }
+    btn.disabled = false; btn.textContent = "Try again";
+    $("#formMsg").innerHTML = `We couldn’t send that from this browser. <a href="${esc(mailHref())}">Email us instead</a>${picked.length ? " and attach your files there" : ""}.`;
+    return;
   }
-  const labels = Object.fromEntries(F.fields.map(f => [f[0], f[1]]));
-  const body = Object.entries(data).filter(([k,v]) => k!=="request" && v).map(([k,v]) => `${labels[k]||k}:\n${v}`).join("\n\n");
-  location.href = `mailto:${CONFIG.requestEmail}?subject=${encodeURIComponent(F.subject + (data.supplier ? ": " + data.supplier : data.company ? ": " + data.company : ""))}&body=${encodeURIComponent(body)}`;
-  done("Your email app should open with the request filled in. Press send there to submit it.");
+  location.href = mailHref();
+  done("Your email app should open with the request filled in." + (picked.length ? " Attach your files to the email, then press send." : " Press send there to submit it."));
 }
 $("#dlgClose").onclick = () => dlg.close();
 dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
