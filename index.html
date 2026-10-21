@@ -567,7 +567,7 @@ const CONFIG = {
   // request is added as a row in your Google Sheet. If it's empty, the form opens a pre-filled email
   // to requestEmail instead.
   sheetEndpoint: "https://script.google.com/macros/s/AKfycbxKNMSZWA47yOKscp4xPsdieOJmLvnS_WC0flSNpbvtmeemJKhd_1nB_-eIjUsszGuZzw/exec",
-  requestEmail: "apine@mindclick.com"
+  requestEmail: "mmaciejewski@mindclick.com"
 };
 
 /* ===================== ICONS ===================== */
@@ -913,10 +913,18 @@ async function submitForm(kind, form){
     el.setAttribute("aria-invalid", invalid); if (invalid && !bad) bad = el;
   });
   if (bad){ $("#formMsg").textContent = "Please fill in the highlighted fields."; bad.focus(); return; }
-  const data = {request: F.title}; new FormData(form).forEach((v,k) => { if (typeof v === "string") data[k] = v.trim(); });
+  
+  const data = {request: F.title};
+  form.querySelectorAll("input, textarea, select").forEach(el => {
+    if (el.name && el.type !== "file") {
+      data[el.name] = el.value.trim();
+    }
+  });
+
   const picked = form._files || [];
-  if (data.hp_field) { dlg.close(); return; }   // spam trap: real visitors never see or fill this
+  if (data.hp_field) { dlg.close(); return; }
   delete data.hp_field;
+  
   data.page = location.href.split("#")[0];
   const done = msg => { $("#dlgBody").innerHTML = `<div class="done"><div class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></div><h2 id="dlgTitle">Thanks, ${esc(data.name||"")}</h2><p>${msg}</p><button type="button" class="btn primary" onclick="this.closest('dialog').close()">Done</button></div>`; };
   const labels = Object.fromEntries(F.fields.map(f => [f[0], f[1]]));
@@ -924,6 +932,48 @@ async function submitForm(kind, form){
     const body = Object.entries(data).filter(([k,v]) => k!=="request" && k!=="page" && v).map(([k,v]) => `${labels[k]||k}:\n${v}`).join("\n\n");
     return `mailto:${CONFIG.requestEmail}?subject=${encodeURIComponent(F.subject + (data.supplier ? ": " + data.supplier : data.company ? ": " + data.company : ""))}&body=${encodeURIComponent(body)}`;
   };
+
+  if (CONFIG.sheetEndpoint){
+    const btn = form.querySelector('button[type="submit"]');
+    btn.disabled = true; btn.textContent = picked.length ? "Uploading files…" : "Sending…"; $("#formMsg").textContent = "";
+    
+    if (picked.length){
+      try { 
+        data.files = await Promise.all(picked.map(async f => ({
+          name: f.name, 
+          type: f.type, 
+          size: f.size, 
+          data: await readB64(f)
+        }))); 
+      } catch(e){ 
+        btn.disabled = false; btn.textContent = "Send request"; $("#formMsg").textContent = "One of the files couldn’t be read. Remove it and try again."; return; 
+      }
+    } else {
+      data.files = [];
+    }
+
+    const payload = JSON.stringify(data);
+    let sent = false;
+    try {
+      await fetch(CONFIG.sheetEndpoint, {method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain;charset=utf-8"}, body: payload});
+      sent = true;
+    } catch(err){
+      if (!picked.length && navigator.sendBeacon) { 
+        try { sent = !!(navigator.sendBeacon(CONFIG.sheetEndpoint, new Blob([payload], {type:"text/plain;charset=utf-8"}))); } catch(e2){ sent = false; } 
+      }
+    }
+    if (sent){
+      const filesNote = picked.length ? ` Your ${picked.length === 1 ? "file was" : picked.length + " files were"} uploaded to Drive.` : "";
+      done((kind==="supplier" ? "We’ve received your supplier request and will follow up by email." : "We’ve received your request. Expect product ratings within 1–2 business days.") + filesNote);
+      return;
+    }
+    btn.disabled = false; btn.textContent = "Try again";
+    $("#formMsg").innerHTML = `We couldn’t send that automatically. <a href="${esc(mailHref())}">Email us instead</a>.`;
+    return;
+  }
+  location.href = mailHref();
+  done("Your email app should open with the request filled in.");
+}
   if (CONFIG.sheetEndpoint){
     const btn = form.querySelector('button[type="submit"]');
     btn.disabled = true; btn.textContent = picked.length ? "Uploading…" : "Sending…"; $("#formMsg").textContent = "";
